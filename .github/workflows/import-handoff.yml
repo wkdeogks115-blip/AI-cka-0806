@@ -1,5 +1,6 @@
 name: Import complete AI orchestration handoff
 
+# Retry trigger after the workflow became present on the default branch.
 on:
   push:
     paths:
