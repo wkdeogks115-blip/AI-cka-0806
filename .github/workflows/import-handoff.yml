@@ -1,7 +1,9 @@
 name: Import complete AI orchestration handoff
 
-# Manual workflow dispatch performs the verified final import.
 on:
+  push:
+    paths:
+      - '128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip'
   workflow_dispatch:
 
 permissions:
@@ -16,26 +18,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download handoff archive
+      - name: Verify uploaded handoff archive
         run: |
           set -euo pipefail
-          curl -L --fail --retry 3 \
-            'https://drive.google.com/uc?export=download&id=1G-_cUicOQTgwnzxGBjwo1DFu60xolmGu' \
-            -o /tmp/handoff.zip
-          echo '8ef449efe79f05dff0431769c6fbeedf6e6c72d7e6f7aafd8ccf64d9cab95581  /tmp/handoff.zip' | sha256sum -c -
+          ARCHIVE='128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip'
+          test -f "$ARCHIVE"
+          echo '8ef449efe79f05dff0431769c6fbeedf6e6c72d7e6f7aafd8ccf64d9cab95581  128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip' | sha256sum -c -
 
       - name: Expand all 219 handoff files
         run: |
           set -euo pipefail
+          ARCHIVE='128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip'
           rm -rf /tmp/handoff-expanded
           mkdir -p /tmp/handoff-expanded
-          unzip -q /tmp/handoff.zip -d /tmp/handoff-expanded
+          unzip -q "$ARCHIVE" -d /tmp/handoff-expanded
           SOURCE_DIR="$(find /tmp/handoff-expanded -mindepth 1 -maxdepth 1 -type d | head -n 1)"
           test -n "$SOURCE_DIR"
           rsync -a "$SOURCE_DIR/" ./
           rm -rf .handoff_parts
           mkdir -p releases
-          cp /tmp/handoff.zip 'releases/128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip'
+          mv "$ARCHIVE" 'releases/128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip'
           cat > UPLOAD_COMPLETE.md <<'EOF'
           # 전체 인수인계 업로드 완료
 
@@ -47,7 +49,7 @@ jobs:
           - Live performance: `UNVERIFIED`
           EOF
 
-      - name: Verify and commit
+      - name: Verify expanded tree and commit
         run: |
           set -euo pipefail
           test -f CONTINUATION_STATE.json
