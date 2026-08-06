@@ -1,0 +1,64 @@
+name: Import complete AI orchestration handoff
+
+on:
+  push:
+    paths:
+      - .github/workflows/import-handoff.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-handoff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download handoff archive
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 \
+            'https://drive.google.com/uc?export=download&id=1G-_cUicOQTgwnzxGBjwo1DFu60xolmGu' \
+            -o /tmp/handoff.zip
+          echo '8ef449efe79f05dff0431769c6fbeedf6e6c72d7e6f7aafd8ccf64d9cab95581  /tmp/handoff.zip' | sha256sum -c -
+
+      - name: Expand all 219 handoff files
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/handoff-expanded
+          mkdir -p /tmp/handoff-expanded
+          unzip -q /tmp/handoff.zip -d /tmp/handoff-expanded
+          SOURCE_DIR="$(find /tmp/handoff-expanded -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+          test -n "$SOURCE_DIR"
+          rsync -a "$SOURCE_DIR/" ./
+          mkdir -p releases
+          cp /tmp/handoff.zip 'releases/128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip'
+          cat > UPLOAD_COMPLETE.md <<'EOF'
+          # 전체 인수인계 업로드 완료
+
+          - Source archive: `128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip`
+          - SHA-256: `8ef449efe79f05dff0431769c6fbeedf6e6c72d7e6f7aafd8ccf64d9cab95581`
+          - Archive entries: `219`
+          - Expanded paths: `CONTINUATION_STATE.json`, `NEXT_RUN_PROMPT.md`, `HANDOFF_MANIFEST.json`, `artifacts/`, `repository/`
+          - Actual Skill / Runtime / Adapter: `NOT_IMPLEMENTED`
+          - Live performance: `UNVERIFIED`
+          EOF
+
+      - name: Verify and commit
+        run: |
+          set -euo pipefail
+          test -f CONTINUATION_STATE.json
+          test -f NEXT_RUN_PROMPT.md
+          test -f HANDOFF_MANIFEST.json
+          test -d artifacts
+          test -d repository
+          test -f 'releases/128_연구소_연속작업_GitHub인수인계팩_v1_0_0.zip'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Import complete AI orchestration handoff archive'
+          git push
