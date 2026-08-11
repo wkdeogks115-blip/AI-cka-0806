@@ -1,0 +1,64 @@
+schema_version: 0.3.4
+artifact: FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_4
+control_owner: portable_ai_orchestrator_v2
+factory_role: build_handoff_release_candidate_plane
+factory_owned_scope:
+  - ARTIFACT_TYPE_GATE
+  - ASSETIZATION_GATE
+  - ARTIFACT_CONTRACT_6W_PLUS
+  - IMPLEMENTATION_HANDOFF
+  - HANDOFF_INDEPENDENCE_READINESS
+  - CODEX_REPO_HANDOFF_ASSETS
+  - GITHUB_CANDIDATE_WORKFLOW_CONTRACT
+  - RELEASE_CONTRACT
+  - ACTIVE_V1_READINESS_GATE
+portable_owned_scope:
+  - top_level_work_control
+  - risk_and_verification_policy
+  - material_delta_primitive
+  - evidence_promotion
+  - technical_pass_gate
+  - generic_adapter_contract_validation
+strict_non_ownership:
+  - final_approval
+  - portable_project_state_write
+  - portable_adapter_registry
+  - portable_ledger_persistence
+  - portable_delivery_executor
+  - actual_model_inference
+  - actual_codex_execution
+principles:
+  - implement_full_factory_surface_once_then_validate_layers_independently
+  - never_promote_scaffold_to_actual_execution_evidence
+  - branch_and_draft_pr_are_candidate_delivery_not_final_release
+  - active_v1_requires_actual_evidence_and_external_final_approval
+  - no_router_stack
+  - no_factory_self_final_approval
+  - no_material_delta_no_version_bump
+  - github_path_scope_fail_closed
+  - candidate_ci_is_not_trust_authority
+  - stale_scope_receipts_fail_closed
+
+activation_boundary:
+  factory_can_activate: false
+  max_factory_result: READY_FOR_EXTERNAL_APPROVAL
+  active_state_owner: EXTERNAL_APPROVAL_GATE
+
+github_candidate_boundary:
+  candidate_branch_prefix: factory-b-
+  allowed_paths:
+    - factory-b/**
+    - .github/workflows/factory-b-candidate.yml
+  all_changed_paths_must_match_allowlist: true
+  on_scope_violation: FAIL_CLOSED
+
+github_trust_boundary:
+  candidate_ci: ADVISORY_ONLY
+  external_pr_scope_audit_required: true
+  external_gate_owner: OUTSIDE_FACTORY_CANDIDATE_BRANCH
+  external_receipt_identity_binding: EXPECTED_REPO_PR_HEAD_PLUS_CHANGED_FILES_DIGEST
+  receipt_origin_boundary: LAB_CAPTURE_REQUIRED_NOT_CRYPTOGRAPHICALLY_ATTESTED
+  protected_controls:
+    - .github/workflows/factory-b-candidate.yml
+    - factory-b/tests/repo_candidate_check.py
+    - factory-b/tests/path_scope.py
