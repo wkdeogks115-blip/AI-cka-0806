@@ -1,0 +1,13 @@
+schema_version: 1.0
+gate: FACTORY_B_EXTERNAL_PR_SCOPE_GATE
+runtime_owner: OUTSIDE_FACTORY_CANDIDATE_BRANCH
+candidate_ci_trust: ADVISORY_ONLY
+gate_reference: FACTORY_B_V1_ExternalPRScopeGate_CANDIDATE_v0_1_0.zip
+required_checks:
+  - complete_changed_file_allowlist
+  - protected_workflow_git_blob_sha
+  - protected_repo_candidate_check_git_blob_sha
+  - protected_path_scope_git_blob_sha
+candidate_actions_success_sufficient: false
+final_approval_granted: false
+on_failure: REJECT_CANDIDATE_SCOPE
