@@ -13,7 +13,7 @@ if errs:
     print('TRANSFER_PACKET_INVALID')
     for e in errs: print('-',e)
     raise SystemExit(2)
-repo=ROOT/'qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001/repo'
+repo=ROOT/'qualification/transfer-qualification-001/repo'
 cp=subprocess.run([sys.executable,'-m','pytest','-q'],cwd=repo,text=True,capture_output=True)
 print(cp.stdout,end='')
 print(cp.stderr,end='')
