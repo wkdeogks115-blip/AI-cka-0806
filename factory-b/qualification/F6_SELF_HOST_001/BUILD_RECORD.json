@@ -1,0 +1,20 @@
+{
+  "qualification_id": "F6_SELF_HOST_001",
+  "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
+  "artifact_type_gate": {"output": "code", "status": "PASS"},
+  "assetization_gate": {"output": "BUILD", "inputs": {"repeated": true, "stable_procedure": true, "material_quality_or_tool_need": true, "existing_solution": "NONE"}},
+  "blueprint": {"id": "CODE_CHANGE", "path": "blueprints/code/BLUEPRINT.yaml", "status": "RESOLVED"},
+  "work_order": {"id": "WO-F6-SELFHOST-001", "status": "FROZEN"},
+  "artifact_hash": "efedb845ed1700b61eed1765364faadc631ddaca7eaa03152cedeb716582ed9b",
+  "verification_owner": "LOCAL_EXECUTOR_PLUS_INDEPENDENT_REVIEW_PENDING",
+  "portable_v2_actual_binding": "UNVERIFIED",
+  "release_target": "GITHUB_PR",
+  "independent_review": "PENDING",
+  "first_real_failure": "ZIP_WRAPPER_ROOT_MANIFEST_ASSUMPTION",
+  "repair": "SUPPORT_EXACTLY_ONE_SAFE_WRAPPER_ROOT",
+  "local_artifact_tests": "PASS_7",
+  "full_regression": "PASS_52",
+  "clean_replay": "PASS",
+  "real_factory_package_check": "PASS_200_OF_200",
+  "real_tamper_check": "PASS_DETECTED_README_SHA_MISMATCH"
+}
