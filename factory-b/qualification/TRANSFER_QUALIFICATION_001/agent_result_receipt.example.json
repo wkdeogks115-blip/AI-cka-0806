@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "FB-TRANSFER-QUAL-001",
+  "status": "COMPLETED",
+  "packet_hash": "3cc427d9b6a8c094e3a92e62c04d314345a40520dbbfe4a6b45a6b1d36b7a109",
+  "agent_label": "EXAMPLE_ONLY_NOT_EXECUTED",
+  "changed_files": ["qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001/repo/src/text_utils.py"],
+  "commands_run": [{"command":"python -m pytest -q","executed":true,"exit_code":0,"summary":"EXAMPLE ONLY"}],
+  "tests": [{"command":"python -m pytest -q","status":"PASS","details":"EXAMPLE ONLY"}],
+  "acceptance_results": [
+    {"criterion":"All existing tests pass.","status":"PASS","evidence":"EXAMPLE ONLY"},
+    {"criterion":"Behavior matches the declared requirements.","status":"PASS","evidence":"EXAMPLE ONLY"},
+    {"criterion":"No unrelated file changes are made.","status":"PASS","evidence":"EXAMPLE ONLY"}
+  ],
+  "clarifications_count": 0,
+  "unrelated_changes": [],
+  "evidence_refs": ["EXAMPLE:test-output","EXAMPLE:changed-files","EXAMPLE:summary"],
+  "limitations": ["This file is a schema example and is not execution evidence."],
+  "candidate_hash_after": null
+}
