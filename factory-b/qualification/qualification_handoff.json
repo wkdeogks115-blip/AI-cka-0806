@@ -1,0 +1,54 @@
+{
+  "TASK_ID": "FACTORY-B-HANDOFF-QUAL-001",
+  "GOAL": "Build a small qualification artifact using only the listed source file and this handoff.",
+  "CURRENT_CONTEXT": "This is a clean-room qualification. No prior conversational context, project memory, Drive state, or repository history is required or permitted.",
+  "REQUIREMENTS": [
+    "Read relevant_files/qualification_source.json.",
+    "Create output/QUALIFICATION_RESULT.md with the exact source title and version.",
+    "Include each source rule id R1, R2, R3 exactly once in the markdown.",
+    "Create output/evidence.json mapping AC-1..AC-5 to observed evidence.",
+    "Do not read or write outside the clean-room work directory."
+  ],
+  "NON_GOALS": [
+    "Do not modify Portable AI Orchestrator v2.",
+    "Do not perform actual model inference.",
+    "Do not claim Codex execution."
+  ],
+  "CONSTRAINTS": [
+    "No network.",
+    "No environment secrets.",
+    "No parent-directory traversal.",
+    "No files except the explicitly staged handoff, source, and worker runtime."
+  ],
+  "RELEVANT_FILES": [
+    {
+      "reference": "relevant_files/qualification_source.json",
+      "sha256": "cbd115d8fe6576ee03ac900f3f7f4283b574ac694fa9d89a65dcd9511738627c"
+    }
+  ],
+  "ACCEPTANCE_CRITERIA": [
+    {"id": "AC-1", "text": "QUALIFICATION_RESULT.md exists."},
+    {"id": "AC-2", "text": "Markdown contains exact source title and version."},
+    {"id": "AC-3", "text": "Markdown contains rule ids R1, R2, R3 exactly once."},
+    {"id": "AC-4", "text": "evidence.json covers AC-1..AC-5."},
+    {"id": "AC-5", "text": "No output path escapes output/ and no hidden context is used."}
+  ],
+  "REQUIRED_TESTS": [
+    {"id": "T-1", "command": "python qualification_worker.py handoff.json"},
+    {"id": "T-2", "command": "python validate_output.py handoff.json output"}
+  ],
+  "DO_NOT": [
+    "Do not use prior conversational context.",
+    "Do not open arbitrary repository files.",
+    "Do not mutate input files.",
+    "Do not claim final approval."
+  ],
+  "EVIDENCE_REQUIRED": [
+    "worker exit code",
+    "staged file inventory",
+    "acceptance criterion mapping",
+    "output sha256"
+  ],
+  "RELEASE_TARGET": "LOCAL",
+  "REPO_SCOPE": ["factory-b/qualification/**"]
+}
