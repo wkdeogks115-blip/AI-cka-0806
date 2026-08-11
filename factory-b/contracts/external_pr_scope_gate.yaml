@@ -1,8 +1,9 @@
-schema_version: 1.0
+schema_version: 1.1
 gate: FACTORY_B_EXTERNAL_PR_SCOPE_GATE
 runtime_owner: OUTSIDE_FACTORY_CANDIDATE_BRANCH
 candidate_ci_trust: ADVISORY_ONLY
-gate_reference: FACTORY_B_V1_ExternalPRScopeGate_CANDIDATE_v0_1_0.zip
+gate_reference: FACTORY_B_V1_ExternalPRScopeGate_PATCH_CANDIDATE_v0_1_1.zip
+gate_sha256: cd6081bac2ea47dc8765bb6341da48e6dee15a4e9c85a3c12c9fe56db381b2ae
 required_checks:
   - complete_changed_file_allowlist
   - protected_workflow_git_blob_sha
