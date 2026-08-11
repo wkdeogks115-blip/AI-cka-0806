@@ -1,5 +1,5 @@
-schema_version: 0.3.1
-artifact: FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_1
+schema_version: 0.3.2
+artifact: FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_2
 control_owner: portable_ai_orchestrator_v2
 factory_role: build_handoff_release_candidate_plane
 factory_owned_scope:
@@ -35,8 +35,17 @@ principles:
   - no_router_stack
   - no_factory_self_final_approval
   - no_material_delta_no_version_bump
+  - github_path_scope_fail_closed
 
 activation_boundary:
   factory_can_activate: false
   max_factory_result: READY_FOR_EXTERNAL_APPROVAL
   active_state_owner: EXTERNAL_APPROVAL_GATE
+
+github_candidate_boundary:
+  candidate_branch_prefix: factory-b-
+  allowed_paths:
+    - factory-b/**
+    - .github/workflows/factory-b-candidate.yml
+  all_changed_paths_must_match_allowlist: true
+  on_scope_violation: FAIL_CLOSED
