@@ -1,4 +1,4 @@
-schema_version: 1.2
+schema_version: 1.3
 activation_target: FACTORY_B_V1_ACTIVE
 factory_activation_authority: NONE
 factory_max_status: READY_FOR_EXTERNAL_APPROVAL
@@ -9,13 +9,14 @@ technical_prerequisites:
   process_isolated_handoff_readiness: PASS
   github_candidate_branch: VERIFIED
   github_draft_pr: VERIFIED
-  github_candidate_ci: PASS  # advisory signal only; not a trust authority
+  github_candidate_ci: PASS  # advisory signal only
   codex_repo_handoff_assets: PRESENT
   actual_codex_execution: VERIFIED
   actual_codex_required_tests: PASS
   handoff_independence_actual: VERIFIED
 external_only:
   external_pr_scope_audit: VERIFIED
+  external_pr_scope_identity_binding: VERIFIED
   external_final_approval: VERIFIED
   active_state_write: EXTERNAL_ONLY
 forbidden_shortcuts:
@@ -24,6 +25,7 @@ forbidden_shortcuts:
   - github_ci_as_semantic_actual_pass
   - candidate_ci_as_trusted_scope_gate
   - github_ci_as_external_pr_scope_audit
+  - stale_or_replayed_scope_receipt_as_current_pr_audit
   - static_or_sandbox_pass_as_semantic_actual_pass
   - factory_self_final_approval
   - factory_runtime_returning_ACTIVE
