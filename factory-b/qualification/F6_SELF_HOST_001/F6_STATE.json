@@ -1,6 +1,6 @@
 {
   "qualification_id": "F6_SELF_HOST_001",
-  "status": "LOCAL_VERIFIED_GITHUB_CI_PENDING_INDEPENDENT_REVIEW_PENDING",
+  "status": "LOCAL_AND_GITHUB_CI_VERIFIED_INDEPENDENT_REVIEW_PENDING",
   "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
   "artifact_type": "code",
   "artifact_hash": "efedb845ed1700b61eed1765364faadc631ddaca7eaa03152cedeb716582ed9b",
@@ -11,7 +11,15 @@
   "real_tamper_check": "PASS_DETECTED_README_HASH_MISMATCH",
   "first_real_failure": "ZIP_WRAPPER_ROOT_MANIFEST_ASSUMPTION",
   "repair": "SUPPORT_EXACTLY_ONE_SAFE_WRAPPER_ROOT",
+  "github_branch": "factory-b/f6-selfhost-001",
+  "github_draft_pr": 11,
+  "github_ci_run_id": 31474121270,
+  "github_ci_job_id": 93723782521,
+  "github_ci_conclusion": "success",
+  "github_artifact_tests": "PASS_7",
+  "github_candidate_hash_check": "PASS",
+  "github_read_back": "PASS",
   "portable_v2_actual_binding": "UNVERIFIED",
   "independent_review": "PENDING",
-  "final_f6_verdict": "PENDING"
+  "final_f6_verdict": "PENDING_INDEPENDENT_REVIEW"
 }
