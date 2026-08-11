@@ -18,9 +18,13 @@
   "negative_control_pr": 12,
   "negative_control_run": 31519004054,
   "negative_control_result": "FAIL_REPRODUCED_BADZIPFILE_ESCAPE",
-  "patch_artifact_tests": "PASS_8_ON_GITHUB_BEFORE_RESEAL",
-  "full_regression": "PREVIOUS_PASS_52_REVALIDATION_PENDING",
-  "clean_replay": "REVALIDATION_PENDING",
-  "real_factory_package_check": "PREVIOUS_PASS_200_OF_200_REVALIDATION_PENDING",
-  "real_tamper_check": "PREVIOUS_PASS_DETECTED_README_SHA_MISMATCH_REVALIDATION_PENDING"
+  "patch_pr": 13,
+  "patch_github_ci_run": 31519624007,
+  "patch_artifact_tests": "PASS_8",
+  "patch_candidate_hash_check": "PASS",
+  "f5_delivery_regression_on_patch_head": "PASS_RUN_31519623836",
+  "full_regression": "PREVIOUS_PASS_52_NOT_REEXECUTED_IN_THIS_PATCH_GATE",
+  "clean_replay": "PREVIOUS_PASS_NOT_REEXECUTED_IN_THIS_PATCH_GATE",
+  "real_factory_package_check": "PREVIOUS_PASS_200_OF_200_NOT_REEXECUTED_IN_THIS_PATCH_GATE",
+  "real_tamper_check": "PREVIOUS_PASS_DETECTED_README_SHA_MISMATCH_NOT_REEXECUTED_IN_THIS_PATCH_GATE"
 }
