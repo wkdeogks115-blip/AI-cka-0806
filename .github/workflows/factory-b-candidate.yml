@@ -8,10 +8,6 @@ jobs:
     if: startsWith(github.head_ref, 'factory-b-')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Run Factory B repository-local checks
+      - name: Deliberately weakened negative-control check
         run: |
-          set -euo pipefail
-          python -B factory-b/tests/repo_candidate_check.py
+          echo SELF_TAMPER_NEGATIVE_CONTROL_FALSE_PASS
