@@ -1,0 +1,2 @@
+NEGATIVE_CONTROL_ONLY
+This root file is intentionally outside Factory B allowed path scope.
