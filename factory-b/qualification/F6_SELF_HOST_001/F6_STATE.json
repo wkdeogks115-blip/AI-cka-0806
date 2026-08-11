@@ -1,0 +1,17 @@
+{
+  "qualification_id": "F6_SELF_HOST_001",
+  "status": "LOCAL_VERIFIED_GITHUB_CI_PENDING_INDEPENDENT_REVIEW_PENDING",
+  "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
+  "artifact_type": "code",
+  "artifact_hash": "efedb845ed1700b61eed1765364faadc631ddaca7eaa03152cedeb716582ed9b",
+  "local_artifact_tests": "PASS_7",
+  "full_factory_regression": "PASS_52",
+  "clean_replay": "PASS",
+  "real_factory_package_check": "PASS_200_OF_200",
+  "real_tamper_check": "PASS_DETECTED_README_HASH_MISMATCH",
+  "first_real_failure": "ZIP_WRAPPER_ROOT_MANIFEST_ASSUMPTION",
+  "repair": "SUPPORT_EXACTLY_ONE_SAFE_WRAPPER_ROOT",
+  "portable_v2_actual_binding": "UNVERIFIED",
+  "independent_review": "PENDING",
+  "final_f6_verdict": "PENDING"
+}
