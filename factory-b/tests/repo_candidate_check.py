@@ -8,7 +8,11 @@ h=json.loads((root/'qualification/qualification_handoff.json').read_text(encodin
 rf=h['RELEVANT_FILES'][0]; p=root/'qualification'/rf['reference']
 got=hashlib.sha256(p.read_bytes()).hexdigest()
 if got!=rf['sha256']: raise SystemExit('qualification source hash mismatch')
-if h['CURRENT_CONTEXT'].lower().find('previous chat')>=0: raise SystemExit('hidden context dependency')
+if 'previous chat' in h['CURRENT_CONTEXT'].lower(): raise SystemExit('hidden context dependency')
 manifest=json.loads((root/'candidate_manifest.json').read_text(encoding='utf-8'))
 if manifest.get('active_release') is not False or manifest.get('codex_execution')!='UNVERIFIED': raise SystemExit('evidence boundary violated')
+if manifest.get('factory_can_activate') is not False or manifest.get('activation_authority')!='EXTERNAL_ONLY': raise SystemExit('activation ownership violated')
+activation=(root/'contracts/activation_gate.yaml').read_text(encoding='utf-8')
+for token in ['factory_activation_authority: NONE','factory_max_status: READY_FOR_EXTERNAL_APPROVAL','factory_runtime_returning_ACTIVE']:
+    if token not in activation: raise SystemExit('activation contract missing:'+token)
 print('FACTORY_B_REPO_CANDIDATE_CHECK_PASS')
