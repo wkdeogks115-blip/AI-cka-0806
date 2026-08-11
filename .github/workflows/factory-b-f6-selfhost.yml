@@ -1,0 +1,25 @@
+name: Factory B F6 Self-host Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/**'
+      - 'factory-b/qualification/F6_SELF_HOST_001/**'
+      - 'factory-b/tools/f6_selfhost_ci.py'
+      - '.github/workflows/factory-b-f6-selfhost.yml'
+  workflow_dispatch:
+
+jobs:
+  f6-selfhost:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependency
+        run: python -m pip install pytest
+      - name: Run produced artifact tests
+        run: python -m pytest -q factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/tests
+      - name: Validate frozen F6 candidate hash and approval boundary
+        run: python factory-b/tools/f6_selfhost_ci.py
