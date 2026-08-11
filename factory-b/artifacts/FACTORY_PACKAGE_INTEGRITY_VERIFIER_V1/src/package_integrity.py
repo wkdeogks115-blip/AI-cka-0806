@@ -63,13 +63,21 @@ def _manifest_rows(manifest: dict[str, Any]) -> tuple[list[dict[str, Any]], list
     return rows, errors
 
 
-def _base_receipt(subject: Path, mode: str) -> dict[str, Any]:
+def _valid_sha256_hex(value: str | None) -> bool:
+    return isinstance(value, str) and len(value) == 64 and all(c in HEX64 for c in value.lower())
+
+
+def _base_receipt(subject: Path, mode: str, expected_manifest_sha256: str | None = None) -> dict[str, Any]:
     return {
         "schema_version": "1.0.0",
         "subject": str(subject),
         "mode": mode,
         "manifest_found": False,
         "manifest_candidate": None,
+        "manifest_sha256": None,
+        "expected_manifest_sha256": expected_manifest_sha256,
+        "manifest_hash_match": None,
+        "integrity_scope": "ANCHORED_MANIFEST" if expected_manifest_sha256 else "SELF_CONSISTENCY_ONLY",
         "declared_files": 0,
         "verified_files": 0,
         "missing": [],
@@ -96,8 +104,8 @@ def _finalize(r: dict[str, Any]) -> dict[str, Any]:
     return r
 
 
-def verify_directory(root: Path) -> dict[str, Any]:
-    r = _base_receipt(root, "DIRECTORY")
+def verify_directory(root: Path, expected_manifest_sha256: str | None = None) -> dict[str, Any]:
+    r = _base_receipt(root, "DIRECTORY", expected_manifest_sha256)
     manifest_path = root / "MANIFEST.json"
     if not manifest_path.is_file():
         r["errors"].append("MANIFEST.json-not-found")
@@ -107,7 +115,17 @@ def verify_directory(root: Path) -> dict[str, Any]:
         return _finalize(r)
     r["manifest_found"] = True
     try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest_bytes = manifest_path.read_bytes()
+        r["manifest_sha256"] = _sha256_bytes(manifest_bytes)
+        if expected_manifest_sha256 is not None:
+            if not _valid_sha256_hex(expected_manifest_sha256):
+                r["errors"].append("expected-manifest-sha256-invalid")
+                r["manifest_hash_match"] = False
+            else:
+                r["manifest_hash_match"] = r["manifest_sha256"] == expected_manifest_sha256.lower()
+                if not r["manifest_hash_match"]:
+                    r["errors"].append("manifest-sha256-mismatch")
+        manifest = json.loads(manifest_bytes.decode("utf-8"))
     except Exception as e:
         r["errors"].append(f"manifest-json-error:{type(e).__name__}")
         return _finalize(r)
@@ -157,8 +175,8 @@ def _zip_is_symlink(info: zipfile.ZipInfo) -> bool:
     return stat.S_ISLNK(mode)
 
 
-def verify_zip(path: Path) -> dict[str, Any]:
-    r = _base_receipt(path, "ZIP")
+def verify_zip(path: Path, expected_manifest_sha256: str | None = None) -> dict[str, Any]:
+    r = _base_receipt(path, "ZIP", expected_manifest_sha256)
     try:
         zf = zipfile.ZipFile(path)
     except Exception as e:
@@ -195,7 +213,17 @@ def verify_zip(path: Path) -> dict[str, Any]:
                 return _finalize(r)
         r["manifest_found"] = True
         try:
-            manifest = json.loads(zf.read(info_by_name[manifest_key]).decode("utf-8"))
+            manifest_bytes = zf.read(info_by_name[manifest_key])
+            r["manifest_sha256"] = _sha256_bytes(manifest_bytes)
+            if expected_manifest_sha256 is not None:
+                if not _valid_sha256_hex(expected_manifest_sha256):
+                    r["errors"].append("expected-manifest-sha256-invalid")
+                    r["manifest_hash_match"] = False
+                else:
+                    r["manifest_hash_match"] = r["manifest_sha256"] == expected_manifest_sha256.lower()
+                    if not r["manifest_hash_match"]:
+                        r["errors"].append("manifest-sha256-mismatch")
+            manifest = json.loads(manifest_bytes.decode("utf-8"))
         except Exception as e:
             r["errors"].append(f"manifest-json-error:{type(e).__name__}")
             return _finalize(r)
@@ -244,13 +272,13 @@ def verify_zip(path: Path) -> dict[str, Any]:
     return _finalize(r)
 
 
-def verify_package(subject: str | Path) -> dict[str, Any]:
+def verify_package(subject: str | Path, *, expected_manifest_sha256: str | None = None) -> dict[str, Any]:
     p = Path(subject)
     if p.is_dir():
-        return verify_directory(p)
+        return verify_directory(p, expected_manifest_sha256)
     if p.is_file() and zipfile.is_zipfile(p):
-        return verify_zip(p)
-    r = _base_receipt(p, "UNKNOWN")
+        return verify_zip(p, expected_manifest_sha256)
+    r = _base_receipt(p, "UNKNOWN", expected_manifest_sha256)
     r["errors"].append("subject-must-be-directory-or-zip")
     return _finalize(r)
 
@@ -258,9 +286,10 @@ def verify_package(subject: str | Path) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Verify Factory package MANIFEST/hash/path integrity only.")
     ap.add_argument("subject")
+    ap.add_argument("--expected-manifest-sha256", help="Externally frozen MANIFEST.json SHA-256 trust anchor. Without it PASS means package self-consistency only.")
     ap.add_argument("--pretty", action="store_true")
     ns = ap.parse_args(argv)
-    receipt = verify_package(ns.subject)
+    receipt = verify_package(ns.subject, expected_manifest_sha256=ns.expected_manifest_sha256)
     print(json.dumps(receipt, ensure_ascii=False, indent=2 if ns.pretty else None, sort_keys=True))
     return 0 if receipt["verdict"] == "PASS" else 2
 
