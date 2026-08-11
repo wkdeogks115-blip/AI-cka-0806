@@ -133,7 +133,11 @@ def verify_directory(root: Path) -> dict[str, Any]:
         if p.is_symlink() or not p.is_file():
             r["unsafe_paths"].append(f"{rel}:not-regular-file")
             continue
-        data = p.read_bytes()
+        try:
+            data = p.read_bytes()
+        except Exception as e:
+            r["errors"].append(f"directory-member-read-error:{rel}:{type(e).__name__}")
+            continue
         if _sha256_bytes(data) != str(row.get("sha256", "")).lower():
             r["hash_mismatches"].append(rel)
             continue
@@ -221,7 +225,11 @@ def verify_zip(path: Path) -> dict[str, Any]:
             if _zip_is_symlink(info):
                 r["unsafe_paths"].append(f"{rel}:symlink")
                 continue
-            data = zf.read(info)
+            try:
+                data = zf.read(info)
+            except Exception as e:
+                r["errors"].append(f"zip-member-read-error:{rel}:{type(e).__name__}")
+                continue
             if _sha256_bytes(data) != str(row.get("sha256", "")).lower():
                 r["hash_mismatches"].append(rel)
                 continue
