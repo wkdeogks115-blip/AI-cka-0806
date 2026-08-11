@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"urn:factory-b:transfer-evaluator-scorecard:v1",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["task_id","verdict","packet_integrity","scope_compliance","required_tests_coverage","test_pass_rate","acceptance_pass_rate","clarifications_count","unrelated_diff_count","evidence_completeness","handoff_independence_status","reasons"],
+  "properties":{
+    "task_id":{"type":"string"},
+    "verdict":{"enum":["ACCEPT","PATCH","REJECT","BLOCKED"]},
+    "packet_integrity":{"type":"boolean"},
+    "scope_compliance":{"type":"boolean"},
+    "required_tests_coverage":{"type":"number","minimum":0,"maximum":1},
+    "test_pass_rate":{"type":"number","minimum":0,"maximum":1},
+    "acceptance_pass_rate":{"type":"number","minimum":0,"maximum":1},
+    "clarifications_count":{"type":"integer","minimum":0},
+    "unrelated_diff_count":{"type":"integer","minimum":0},
+    "evidence_completeness":{"type":"number","minimum":0,"maximum":1},
+    "handoff_independence_status":{"enum":["PASS","PARTIAL","FAIL","UNVERIFIED"]},
+    "reasons":{"type":"array","items":{"type":"string"}}
+  }
+}
