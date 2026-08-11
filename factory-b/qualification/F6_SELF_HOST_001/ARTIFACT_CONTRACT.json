@@ -1,0 +1,23 @@
+{
+  "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
+  "artifact_type": "code",
+  "who": "Factory B builders, reviewers, CI jobs, and receiving implementation agents",
+  "what": "A deterministic verifier for package manifest, hash, file-count, path, and regular-file integrity",
+  "why": "Every reusable Factory package needs a cheap independent byte/path integrity check before semantic verification or release review",
+  "when": "After package creation, after transport/read-back, and before higher-level evidence or release decisions",
+  "where": "Local Linux, GitHub Actions, or another environment with Python 3.11+",
+  "how": "Read root MANIFEST.json, validate declared rows, compare bytes/sizes/paths, reject unsafe entries, and emit a JSON receipt",
+  "inputs": ["Factory package directory or ZIP containing root MANIFEST.json"],
+  "outputs": ["Machine-readable integrity receipt", "CLI exit status"],
+  "dependencies": ["Python standard library"],
+  "constraints": ["No semantic artifact correctness decision", "No evidence sufficiency decision", "No release approval decision", "No extraction of ZIP content is required"],
+  "approval_boundary": "The verifier may report byte/path integrity only; external release still requires the governing Release Contract and scoped approval",
+  "failure_modes": ["Malformed or missing manifest", "Hash/size mismatch", "Missing/unexpected file", "Path traversal or absolute path", "Duplicate path", "Symlink or non-regular file"],
+  "recovery": ["Rebuild the package from the frozen source candidate and regenerate the manifest"],
+  "success_criteria": ["Current Factory package verifies", "Negative mutation tests are detected", "Full regression suite passes"],
+  "test_status": "PROJECT_PASS",
+  "known_limitations": ["v1 supports the current Factory B MANIFEST.json shape", "It proves integrity, not semantic quality or provenance truth"],
+  "version": "1.0.0-candidate",
+  "candidate_hash": "efedb845ed1700b61eed1765364faadc631ddaca7eaa03152cedeb716582ed9b",
+  "provenance": ["FACTORY_B_V1 F6 self-host qualification"]
+}
