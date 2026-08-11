@@ -1,11 +1,11 @@
 {
   "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
   "target": "GITHUB_PR",
-  "candidate_hash": "efedb845ed1700b61eed1765364faadc631ddaca7eaa03152cedeb716582ed9b",
-  "verification_state": "PASS",
+  "candidate_hash": "a07ccd83fbe26686b1cc755b3594c23ddf58a6a6c4619608d4682c0b038117d5",
+  "verification_state": "PATCH_VERIFICATION_PENDING",
   "approval_state": "SCOPED_APPROVED",
   "independent_approval": "PENDING",
   "read_back_required": true,
   "rollback_required": false,
-  "notes": ["F6 candidate only; do not merge until independent review gate is satisfied.", "Integrity verifier is a support artifact, not a new Core module."]
+  "notes": ["F6 patch candidate only; do not merge until independent review gate is satisfied.", "Integrity verifier is a support artifact, not a new Core module.", "PR #12 reproduced corrupt-member exception escape; v1.0.1 patch must preserve machine-readable FAIL behavior."]
 }
