@@ -1,6 +1,6 @@
 product_id: FACTORY_B_V1
 name: AI 제작소 — Harness B Factory
-version: 1.0.0-f5-github-rehearsal-pass-candidate
+version: 1.0.0-f5.1-transfer-system-candidate
 status: CANDIDATE
 architecture: THIN_6_MODULE_PLUS_BLUEPRINT_SUPPORT_PLUS_SHADOW_BRIDGE
 portable_v2_binding: NOT_BOUND_UNVERIFIED
@@ -14,10 +14,10 @@ core_modules:
   release_contract: CREATED
 delegated_capabilities: DEFINED_MOCK_CONTRACT_TESTED_ACTUAL_UNBOUND
 local_validation:
-  static: PASS_29_REQUIRED_10_SCHEMAS_6_CORE_11_BLUEPRINTS
-  pytest: PASS_37
+  static: PASS_40_REQUIRED_13_SCHEMAS_6_CORE_11_BLUEPRINTS
+  pytest: PASS_45
   failure_injection: PASS_4_OF_4
-  clean_replay: PASS_AFTER_F4A_PATCHES
+  clean_replay: PASS_F5_1_TRANSFER_SYSTEM
   architecture_simulation: PASS
   blueprint_registry: PASS
   blueprint_coverage_simulation: PASS_50000
@@ -38,18 +38,15 @@ runtime_validation:
   multi_artifact_pilots: POLICY_SKILL_CODE_LOCAL_PASS_SHADOW_SIMULATED
   github_full_factory_delivery: NOT_RUN
 next_actions:
-- run real implementation-agent handoff independence test using the GitHub-hosted
-  qualification fixture or exported task ZIP
-- after agent result, measure clarification count, acceptance, actual tests, unrelated
-  diff, and evidence completeness
-- bind actual portable_v2 contracts and run shadow-vs-actual differential tests when
-  source/contracts are available
-- after real-agent evidence, decide whether to expand the GitHub candidate from rehearsal
-  subset to full Factory source
-- run Factory self-host qualification on one useful real artifact
-- consider ACTIVE only after actual external evidence closes remaining blockers
-generated_at: '2026-08-11T07:24:00+09:00'
-last_local_validation_at: '2026-08-11T07:24:00+09:00'
+- run real external-agent transfer qualification using FACTORY_B_V1_TRANSFER_QUALIFICATION_001.zip
+  or GitHub branch factory-b/handoff-agent-001
+- evaluate returned receipt and actual GitHub diff/test evidence
+- only after real-agent evidence decide PASS/PATCH for Handoff Independence
+- bind actual portable_v2 later for shadow-vs-actual differential verification
+- consider full Factory GitHub delivery and self-host qualification after transfer
+  evidence
+generated_at: '2026-08-11T16:29:00+09:00'
+last_local_validation_at: '2026-08-11T16:29:00+09:00'
 blueprint_foundation:
   bootstrap_model: CREATED
   build_sequence: CREATED
@@ -81,3 +78,19 @@ f5_github_rehearsal:
   read_back: PASS_MANIFEST_AND_WORKFLOW
   main_branch_mutated: false
   merge_performed: false
+transfer_system:
+  status: LOCAL_QUALIFIED_CANDIDATE
+  role: SUPPORT_LAYER_NOT_CORE
+  packet_schema: CREATED_VALIDATED
+  receipt_schema: CREATED_VALIDATED
+  evaluator_schema: CREATED_VALIDATED
+  packager: CREATED_TESTED
+  qualification_task: FB-TRANSFER-QUAL-001
+  qualification_packet_hash: 3cc427d9b6a8c094e3a92e62c04d314345a40520dbbfe4a6b45a6b1d36b7a109
+  local_pytest: PASS_45
+  transfer_protocol_simulation: PASS_20000_0_INVARIANT_VIOLATIONS_SIMULATED
+  transfer_zip_manifest: PASS_12_FILES_0_HASH_ERRORS
+  baseline_fixture: PASS_EXPECTED_3_TEST_FAILURES_BEFORE_AGENT
+  clean_replay: PASS
+  actual_external_agent_run: NOT_RUN
+  handoff_independence: UNVERIFIED
