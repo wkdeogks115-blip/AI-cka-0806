@@ -1,8 +1,8 @@
 {
-  "artifact": "FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_1",
+  "artifact": "FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_2",
   "repo": "wkdeogks115-blip/AI-cka-0806",
   "base": "main",
-  "branch": "factory-b-v1-integration-v0.3.1",
+  "branch": "factory-b-v1-integration-v0.3.2",
   "pr_mode": "DRAFT",
   "scope": [
     "factory-b/**",
@@ -12,5 +12,7 @@
   "active_release": false,
   "codex_execution": "UNVERIFIED",
   "activation_authority": "EXTERNAL_ONLY",
-  "factory_can_activate": false
+  "factory_can_activate": false,
+  "path_scope_enforcement": "FAIL_CLOSED_CHANGED_FILES",
+  "candidate_branch_prefix": "factory-b-"
 }
