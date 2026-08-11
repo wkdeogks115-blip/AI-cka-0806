@@ -89,3 +89,43 @@ def test_single_wrapper_root_zip_passes(tmp_path):
     r=verify_package(z)
     assert r["verdict"]=="PASS"
     assert r["verified_files"]==1
+
+
+def test_manifest_anchor_passes(tmp_path):
+    files={"a.txt":b"a"}; m=_manifest(files)
+    manifest_bytes=json.dumps(m).encode()
+    z=tmp_path/"x.zip"
+    with zipfile.ZipFile(z,"w",zipfile.ZIP_DEFLATED) as f:
+        f.writestr("a.txt",b"a")
+        f.writestr("MANIFEST.json",manifest_bytes)
+    expected=hashlib.sha256(manifest_bytes).hexdigest()
+    r=verify_package(z,expected_manifest_sha256=expected)
+    assert r["verdict"]=="PASS"
+    assert r["integrity_scope"]=="ANCHORED_MANIFEST"
+    assert r["manifest_hash_match"] is True
+
+
+def test_coordinated_payload_and_manifest_tamper_detected_with_anchor(tmp_path):
+    original_files={"a.txt":b"original"}; original_manifest=_manifest(original_files)
+    original_manifest_bytes=json.dumps(original_manifest).encode()
+    expected=hashlib.sha256(original_manifest_bytes).hexdigest()
+    tampered=b"tampered"
+    tampered_manifest=_manifest({"a.txt":tampered})
+    z=tmp_path/"coordinated.zip"
+    with zipfile.ZipFile(z,"w",zipfile.ZIP_DEFLATED) as f:
+        f.writestr("a.txt",tampered)
+        f.writestr("MANIFEST.json",json.dumps(tampered_manifest).encode())
+    unanchored=verify_package(z)
+    assert unanchored["verdict"]=="PASS"
+    assert unanchored["integrity_scope"]=="SELF_CONSISTENCY_ONLY"
+    anchored=verify_package(z,expected_manifest_sha256=expected)
+    assert anchored["verdict"]=="FAIL"
+    assert anchored["manifest_hash_match"] is False
+    assert "manifest-sha256-mismatch" in anchored["errors"]
+
+
+def test_invalid_manifest_anchor_rejected(tmp_path):
+    z=tmp_path/"x.zip"; _write_zip(z,{"a.txt":b"a"})
+    r=verify_package(z,expected_manifest_sha256="not-a-sha")
+    assert r["verdict"]=="FAIL"
+    assert "expected-manifest-sha256-invalid" in r["errors"]
