@@ -1,0 +1,11 @@
+{
+  "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
+  "target": "GITHUB_PR",
+  "candidate_hash": "efedb845ed1700b61eed1765364faadc631ddaca7eaa03152cedeb716582ed9b",
+  "verification_state": "PASS",
+  "approval_state": "SCOPED_APPROVED",
+  "independent_approval": "PENDING",
+  "read_back_required": true,
+  "rollback_required": false,
+  "notes": ["F6 candidate only; do not merge until independent review gate is satisfied.", "Integrity verifier is a support artifact, not a new Core module."]
+}
