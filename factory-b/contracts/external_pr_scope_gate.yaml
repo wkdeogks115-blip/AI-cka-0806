@@ -1,10 +1,16 @@
-schema_version: 1.1
+schema_version: 1.2
 gate: FACTORY_B_EXTERNAL_PR_SCOPE_GATE
 runtime_owner: OUTSIDE_FACTORY_CANDIDATE_BRANCH
 candidate_ci_trust: ADVISORY_ONLY
-gate_reference: FACTORY_B_V1_ExternalPRScopeGate_PATCH_CANDIDATE_v0_1_1.zip
-gate_sha256: cd6081bac2ea47dc8765bb6341da48e6dee15a4e9c85a3c12c9fe56db381b2ae
+gate_reference: FACTORY_B_V1_ExternalPRScopeGate_PATCH_CANDIDATE_v0_1_2.zip
+gate_sha256: c9f492837b513de1c6cdc255f85e9e323e8ad8f61f1038fb283c2dc2b08e2420
+identity_binding: EXPECTED_REPO_PR_HEAD_PLUS_CHANGED_FILES_DIGEST
+receipt_origin_boundary: LAB_CAPTURE_REQUIRED_NOT_CRYPTOGRAPHICALLY_ATTESTED
 required_checks:
+  - exact_repo_binding
+  - exact_pr_binding
+  - exact_head_binding
+  - canonical_changed_files_digest_binding
   - complete_changed_file_allowlist
   - protected_workflow_git_blob_sha
   - protected_repo_candidate_check_git_blob_sha
