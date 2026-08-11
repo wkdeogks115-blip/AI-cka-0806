@@ -1,0 +1,61 @@
+{
+  "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
+  "artifact_type": "code",
+  "who": "Factory B builders, reviewers, CI jobs, and receiving implementation agents",
+  "what": "A deterministic verifier for package manifest, hash, file-count, path, regular-file, and readable-member integrity",
+  "why": "Every reusable Factory package needs a cheap independent byte/path integrity check before semantic verification or release review",
+  "when": "After package creation, after transport/read-back, and before higher-level evidence or release decisions",
+  "where": "Local Linux, GitHub Actions, or another environment with Python 3.11+",
+  "how": "Read MANIFEST.json, validate declared rows, compare bytes/sizes/paths, optionally compare the manifest itself to an externally frozen SHA-256 trust anchor, convert package-member read failures into machine-readable FAIL evidence, and emit a JSON receipt",
+  "inputs": [
+    "Factory package directory or ZIP containing MANIFEST.json; ZIP may use exactly one safe wrapper root"
+  ],
+  "outputs": [
+    "Machine-readable integrity receipt including manifest_sha256/integrity_scope",
+    "CLI exit status"
+  ],
+  "dependencies": [
+    "Python standard library"
+  ],
+  "constraints": [
+    "No semantic artifact correctness decision",
+    "No evidence sufficiency decision",
+    "No release approval decision",
+    "No extraction of ZIP content is required"
+  ],
+  "approval_boundary": "The verifier may report byte/path/readability integrity only; external release still requires the governing Release Contract and scoped approval",
+  "failure_modes": [
+    "Malformed or missing manifest",
+    "Hash/size mismatch",
+    "Missing/unexpected file",
+    "Path traversal or absolute path",
+    "Duplicate path",
+    "Symlink or non-regular file",
+    "Corrupt or otherwise unreadable directory/ZIP member"
+  ],
+  "recovery": [
+    "Rebuild the package from the frozen source candidate and regenerate the manifest",
+    "Treat unreadable/corrupt members as FAIL evidence rather than allowing an exception to escape"
+  ],
+  "success_criteria": [
+    "Current Factory package verifies",
+    "Negative mutation tests are detected",
+    "Corrupt ZIP member returns a machine-readable FAIL receipt",
+    "Full regression suite passes",
+    "Anchored mode rejects coordinated payload+manifest substitution against the frozen manifest hash"
+  ],
+  "test_status": "PATCH_REVALIDATION_PENDING",
+  "known_limitations": [
+    "Without an external expected MANIFEST.json SHA-256, PASS proves self-consistency only and cannot detect coordinated payload+manifest substitution",
+    "v1 supports the current Factory B MANIFEST.json shape",
+    "ZIP wrapper support is limited to exactly one safe top-level wrapper directory",
+    "It proves byte/path/readability consistency, not semantic quality, provenance truth, or release approval"
+  ],
+  "version": "1.0.2-patch-candidate",
+  "candidate_hash": "9cc6c200eb23fc95042d0aa1cc75720388ebe0d09be9a54d901ab7ae0a595a2f",
+  "provenance": [
+    "FACTORY_B_V1 F6 self-host qualification",
+    "F6.1 external MANIFEST SHA-256 trust-anchor patch",
+    "PR #12 corrupt ZIP negative-control reproduction"
+  ]
+}
