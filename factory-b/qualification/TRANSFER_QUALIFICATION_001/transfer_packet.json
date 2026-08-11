@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "FB-TRANSFER-QUAL-001",
+  "status": "FROZEN",
+  "goal": "Implement normalize_slug using only the explicitly transferred repository task context, then return auditable evidence.",
+  "artifact_type": "code",
+  "source_candidate_hash": "3f4f48a0b83908fe72011277f1ba39cf8cb174795247c39fb99b1dcce000aab5",
+  "relevant_files": [
+    "qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001/repo/AGENTS.md",
+    "qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001/repo/HANDOFF.md",
+    "qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001/repo/src/text_utils.py",
+    "qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001/repo/tests/test_text_utils.py"
+  ],
+  "allowed_write_scope": [
+    "qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001/repo/src/text_utils.py"
+  ],
+  "requirements": [
+    "Lowercase ASCII letters.",
+    "Convert one or more whitespace characters to one hyphen.",
+    "Remove punctuation other than hyphens.",
+    "Collapse repeated hyphens.",
+    "Strip leading and trailing hyphens."
+  ],
+  "non_goals": [
+    "Unicode transliteration.",
+    "External packages.",
+    "Deployment, publication, merge, or permission changes."
+  ],
+  "constraints": [
+    "Use Python standard library only.",
+    "Do not rely on prior chat, hidden context, or unrelated repository files.",
+    "Do not edit tests unless the task is otherwise impossible and report BLOCKED instead of silently changing them."
+  ],
+  "acceptance_criteria": [
+    "All existing tests pass.",
+    "Behavior matches the declared requirements.",
+    "No unrelated file changes are made."
+  ],
+  "required_tests": [
+    "python -m pytest -q"
+  ],
+  "evidence_required": [
+    "Executed test command and actual result.",
+    "Changed-file list.",
+    "Short implementation summary."
+  ],
+  "prohibited_actions": [
+    "Do not merge to main.",
+    "Do not deploy or publish.",
+    "Do not modify external systems.",
+    "Do not claim tests or actions that were not executed."
+  ],
+  "release_target": "GITHUB_BRANCH",
+  "packet_hash": "3cc427d9b6a8c094e3a92e62c04d314345a40520dbbfe4a6b45a6b1d36b7a109",
+  "context_policy": "EXPLICIT_FILES_ONLY_NO_PRIOR_CHAT",
+  "agent_profile": "GENERIC_AI_AGENT"
+}
