@@ -8,6 +8,8 @@ Scope: `factory-b/**` only, except the candidate CI workflow `.github/workflows/
 - Do not claim tests you did not execute.
 - Do not merge or release to production/public without an external final-approval gate.
 - Prefer minimal diffs and keep unrelated repository paths untouched.
-- Any changed path outside `factory-b/**` and `.github/workflows/factory-b-candidate.yml` is a candidate-scope violation and must fail closed.
+- Any changed path outside `factory-b/**` and `.github/workflows/factory-b-candidate.yml` is a candidate-scope violation.
+- Candidate-owned GitHub Actions are advisory only because this branch can modify its own workflow/checker.
+- Acceptance requires an external PR-scope audit outside the candidate branch.
 - For this candidate, actual Codex execution evidence must be labeled separately from process-isolated readiness.
 - Factory runtime must never set ACTIVE. At most report `READY_FOR_EXTERNAL_APPROVAL`; ACTIVE is external-gate-owned.
