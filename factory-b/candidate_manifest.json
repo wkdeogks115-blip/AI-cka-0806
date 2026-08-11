@@ -1,0 +1,11 @@
+{
+  "artifact": "FACTORY_B_V1_IntegratedFactory_PREACTIVE_CANDIDATE_v0_3_0",
+  "repo": "wkdeogks115-blip/AI-cka-0806",
+  "base": "main",
+  "branch": "factory-b-v1-integration-v0.3.0",
+  "pr_mode": "DRAFT",
+  "scope": ["factory-b/**", ".github/workflows/factory-b-candidate.yml"],
+  "merge_authorized": false,
+  "active_release": false,
+  "codex_execution": "UNVERIFIED"
+}
