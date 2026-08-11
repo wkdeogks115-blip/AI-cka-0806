@@ -86,7 +86,7 @@ transfer_system:
   evaluator_schema: CREATED_VALIDATED
   packager: CREATED_TESTED
   qualification_task: FB-TRANSFER-QUAL-001
-  qualification_packet_hash: 3cc427d9b6a8c094e3a92e62c04d314345a40520dbbfe4a6b45a6b1d36b7a109
+  qualification_packet_hash: 8c63f56e3e91c25e1714982f054c7c85d96a7ac87fa20f319531c008030b3cf9
   local_pytest: PASS_45
   transfer_protocol_simulation: PASS_20000_0_INVARIANT_VIOLATIONS_SIMULATED
   transfer_zip_manifest: PASS_12_FILES_0_HASH_ERRORS
@@ -94,3 +94,21 @@ transfer_system:
   clean_replay: PASS
   actual_external_agent_run: NOT_RUN
   handoff_independence: UNVERIFIED
+  github_ci_preagent: VERIFIED_PASS_AFTER_REAL_PATH_PATCH
+  github_path_patch: CANONICAL_qualification/transfer-qualification-001/repo
+github_transfer_qualification:
+  status: PRE_AGENT_CI_VERIFIED_PASS
+  branch: factory-b/handoff-agent-001
+  draft_pr: 10
+  head_sha: d0afe6691f79955095e7b338b7ea5b597d2f0c69
+  initial_failed_run_id: 31470612753
+  initial_failure: CASE_PATH_MISMATCH_LOCAL_VS_GITHUB
+  patched_to: qualification/transfer-qualification-001/repo
+  successful_run_id: 31470945193
+  successful_job_id: 93713909371
+  ci_conclusion: success
+  packet_hash: 8c63f56e3e91c25e1714982f054c7c85d96a7ac87fa20f319531c008030b3cf9
+  baseline_tests: EXPECTED_3_FAIL_BEFORE_AGENT
+  main_branch_mutated: false
+  merge_performed: false
+  actual_external_agent_run: NOT_RUN
