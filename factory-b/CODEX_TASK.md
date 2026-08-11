@@ -25,3 +25,6 @@ A successful Codex run may prove repository-local handoff execution for this can
 
 ## Activation boundary
 Do not add any Factory-local path that returns or writes `ACTIVE`. A completed technical run may only reach `READY_FOR_EXTERNAL_APPROVAL`; independent external approval owns ACTIVE promotion.
+
+## GitHub trust boundary
+Candidate-owned Actions SUCCESS is advisory only. The candidate can modify its own workflow/checker, so scope acceptance requires an external PR-scope audit owned outside the candidate branch. Do not treat GitHub Actions SUCCESS as that external audit.
