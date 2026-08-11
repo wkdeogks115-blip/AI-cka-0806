@@ -1,5 +1,5 @@
-schema_version: 0.3.2
-artifact: FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_2
+schema_version: 0.3.3
+artifact: FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_3
 control_owner: portable_ai_orchestrator_v2
 factory_role: build_handoff_release_candidate_plane
 factory_owned_scope:
@@ -36,6 +36,7 @@ principles:
   - no_factory_self_final_approval
   - no_material_delta_no_version_bump
   - github_path_scope_fail_closed
+  - candidate_ci_is_not_trust_authority
 
 activation_boundary:
   factory_can_activate: false
@@ -49,3 +50,12 @@ github_candidate_boundary:
     - .github/workflows/factory-b-candidate.yml
   all_changed_paths_must_match_allowlist: true
   on_scope_violation: FAIL_CLOSED
+
+github_trust_boundary:
+  candidate_ci: ADVISORY_ONLY
+  external_pr_scope_audit_required: true
+  external_gate_owner: OUTSIDE_FACTORY_CANDIDATE_BRANCH
+  protected_controls:
+    - .github/workflows/factory-b-candidate.yml
+    - factory-b/tests/repo_candidate_check.py
+    - factory-b/tests/path_scope.py
