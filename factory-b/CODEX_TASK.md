@@ -22,3 +22,6 @@ Validate that the `factory-b/` candidate can be understood and modified from rep
 
 ## Success boundary
 A successful Codex run may prove repository-local handoff execution for this candidate. It does not by itself activate Factory B v1; activation still requires the external approval gate defined in `activation_gate.yaml`.
+
+## Activation boundary
+Do not add any Factory-local path that returns or writes `ACTIVE`. A completed technical run may only reach `READY_FOR_EXTERNAL_APPROVAL`; independent external approval owns ACTIVE promotion.
