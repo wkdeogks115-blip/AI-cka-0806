@@ -1,0 +1,114 @@
+product_id: FACTORY_B_V1
+name: AI 제작소 — Harness B Factory
+version: 1.0.0-f5.1-transfer-system-candidate
+status: CANDIDATE
+architecture: THIN_6_MODULE_PLUS_BLUEPRINT_SUPPORT_PLUS_SHADOW_BRIDGE
+portable_v2_binding: NOT_BOUND_UNVERIFIED
+github_repository: wkdeogks115-blip/AI-cka-0806
+core_modules:
+  artifact_type_gate: CREATED
+  assetization_gate: CREATED
+  artifact_contract_6w_plus: CREATED
+  implementation_handoff: CREATED
+  handoff_independence_test: CREATED
+  release_contract: CREATED
+delegated_capabilities: DEFINED_MOCK_CONTRACT_TESTED_ACTUAL_UNBOUND
+local_validation:
+  static: PASS_40_REQUIRED_13_SCHEMAS_6_CORE_11_BLUEPRINTS
+  pytest: PASS_45
+  failure_injection: PASS_4_OF_4
+  clean_replay: PASS_F5_1_TRANSFER_SYSTEM
+  architecture_simulation: PASS
+  blueprint_registry: PASS
+  blueprint_coverage_simulation: PASS_50000
+  blueprint_failure_injection: PASS_3_OF_3
+  bridge_contract_mock: PASS_SIMULATED
+  f4_production_pilot: SIMULATED_PARTIAL_PASS
+  release_gate_exhaustive: PASS_960_COMBINATIONS_0_UNSAFE_BYPASS
+  f4_multi_artifact_pilots: PASS_POLICY_SKILL_CODE_LOCAL_SHADOW_SIMULATED
+  artifact_tree_hashing: CREATED_TESTED_PASS
+  handoff_linter_mutation_simulation: PASS_5000_POSITIVE_0_MISS_2_NEGATIVE_0_FALSE_BLOCK_SIMULATED
+  handoff_cleanroom_rehearsal: STATIC_PASS_ACTUAL_AGENT_NOT_RUN
+runtime_validation:
+  portable_bridge: MOCK_ONLY_PASS_ACTUAL_UNBOUND
+  codex_handoff_independence: STATIC_REHEARSAL_PASS_ACTUAL_AGENT_NOT_RUN
+  github_delivery: F5_REHEARSAL_VERIFIED_PASS_BRANCH_DRAFT_PR_CI_READBACK
+  real_project_e2e: NOT_RUN
+  first_artifact_pilot: SIMULATED_PARTIAL_PASS_ACTUAL_VERIFICATION_BLOCKED
+  multi_artifact_pilots: POLICY_SKILL_CODE_LOCAL_PASS_SHADOW_SIMULATED
+  github_full_factory_delivery: NOT_RUN
+next_actions:
+- run real external-agent transfer qualification using FACTORY_B_V1_TRANSFER_QUALIFICATION_001.zip
+  or GitHub branch factory-b/handoff-agent-001
+- evaluate returned receipt and actual GitHub diff/test evidence
+- only after real-agent evidence decide PASS/PATCH for Handoff Independence
+- bind actual portable_v2 later for shadow-vs-actual differential verification
+- consider full Factory GitHub delivery and self-host qualification after transfer
+  evidence
+generated_at: '2026-08-11T16:29:00+09:00'
+last_local_validation_at: '2026-08-11T16:29:00+09:00'
+blueprint_foundation:
+  bootstrap_model: CREATED
+  build_sequence: CREATED
+  registry: CREATED
+  artifact_type_coverage: PASS_11_OF_11
+  work_order_schema: CREATED
+  self_hosting: NOT_RUN
+shadow_portable_v2_simulation:
+  source: bridge/exchange/02_PORTABLE_V2_BINDING_RETURN.yaml
+  source_provenance: USER_SUPPLIED_EXPORT
+  status: SIMULATED_PASS
+  trials: 100000
+  invariant_violations: 0
+  clean_replay: PASS
+  f4_pilot_shadow_gate: SIMULATED_PASS
+  actual_portable_binding: UNVERIFIED
+  promotion_to_bound_verified_allowed: false
+github_repository_role: PARENT_LAB_REPO_CANDIDATE_TARGET
+f5_github_rehearsal:
+  status: VERIFIED_PASS
+  branch: factory-b/f5-delivery-rehearsal-001
+  draft_pr: 3
+  head_sha: 4d9927c4128290a8a68bed44c321175fa2026e71
+  changed_files: 11
+  ci_workflow: Factory B F5 Delivery Rehearsal
+  ci_run_id: 31459020525
+  ci_job_id: 93678632695
+  ci_conclusion: success
+  read_back: PASS_MANIFEST_AND_WORKFLOW
+  main_branch_mutated: false
+  merge_performed: false
+transfer_system:
+  status: LOCAL_QUALIFIED_CANDIDATE
+  role: SUPPORT_LAYER_NOT_CORE
+  packet_schema: CREATED_VALIDATED
+  receipt_schema: CREATED_VALIDATED
+  evaluator_schema: CREATED_VALIDATED
+  packager: CREATED_TESTED
+  qualification_task: FB-TRANSFER-QUAL-001
+  qualification_packet_hash: 8c63f56e3e91c25e1714982f054c7c85d96a7ac87fa20f319531c008030b3cf9
+  local_pytest: PASS_45
+  transfer_protocol_simulation: PASS_20000_0_INVARIANT_VIOLATIONS_SIMULATED
+  transfer_zip_manifest: PASS_12_FILES_0_HASH_ERRORS
+  baseline_fixture: PASS_EXPECTED_3_TEST_FAILURES_BEFORE_AGENT
+  clean_replay: PASS
+  actual_external_agent_run: NOT_RUN
+  handoff_independence: UNVERIFIED
+  github_ci_preagent: VERIFIED_PASS_AFTER_REAL_PATH_PATCH
+  github_path_patch: CANONICAL_qualification/transfer-qualification-001/repo
+github_transfer_qualification:
+  status: PRE_AGENT_CI_VERIFIED_PASS
+  branch: factory-b/handoff-agent-001
+  draft_pr: 10
+  head_sha: d0afe6691f79955095e7b338b7ea5b597d2f0c69
+  initial_failed_run_id: 31470612753
+  initial_failure: CASE_PATH_MISMATCH_LOCAL_VS_GITHUB
+  patched_to: qualification/transfer-qualification-001/repo
+  successful_run_id: 31470945193
+  successful_job_id: 93713909371
+  ci_conclusion: success
+  packet_hash: 8c63f56e3e91c25e1714982f054c7c85d96a7ac87fa20f319531c008030b3cf9
+  baseline_tests: EXPECTED_3_FAIL_BEFORE_AGENT
+  main_branch_mutated: false
+  merge_performed: false
+  actual_external_agent_run: NOT_RUN

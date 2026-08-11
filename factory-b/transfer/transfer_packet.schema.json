@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:factory-b:transfer-packet:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version","task_id","status","goal","artifact_type","source_candidate_hash",
+    "relevant_files","allowed_write_scope","requirements","non_goals","constraints",
+    "acceptance_criteria","required_tests","evidence_required","prohibited_actions",
+    "release_target","packet_hash","context_policy"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "task_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["FROZEN"]},
+    "goal": {"type": "string", "minLength": 1},
+    "artifact_type": {"type": "string", "minLength": 1},
+    "source_candidate_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "relevant_files": {"type":"array","items":{"type":"string","minLength":1},"minItems":1,"uniqueItems":true},
+    "allowed_write_scope": {"type":"array","items":{"type":"string","minLength":1},"minItems":1,"uniqueItems":true},
+    "requirements": {"type":"array","items":{"type":"string","minLength":1},"minItems":1},
+    "non_goals": {"type":"array","items":{"type":"string"}},
+    "constraints": {"type":"array","items":{"type":"string"}},
+    "acceptance_criteria": {"type":"array","items":{"type":"string","minLength":1},"minItems":1},
+    "required_tests": {"type":"array","items":{"type":"string","minLength":1},"minItems":1},
+    "evidence_required": {"type":"array","items":{"type":"string","minLength":1},"minItems":1},
+    "prohibited_actions": {"type":"array","items":{"type":"string","minLength":1},"minItems":1},
+    "release_target": {"enum":["LOCAL","GITHUB_BRANCH","GITHUB_PR"]},
+    "packet_hash": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+    "context_policy": {"const":"EXPLICIT_FILES_ONLY_NO_PRIOR_CHAT"},
+    "agent_profile": {"enum":["GENERIC_AI_AGENT","CODEX","CLAUDE_CODE","HUMAN_DEVELOPER"]}
+  }
+}

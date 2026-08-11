@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "FB-TRANSFER-QUAL-001",
+  "status": "COMPLETED",
+  "packet_hash": "8c63f56e3e91c25e1714982f054c7c85d96a7ac87fa20f319531c008030b3cf9",
+  "agent_label": "EXAMPLE_ONLY_NOT_EXECUTED",
+  "changed_files": ["qualification/transfer-qualification-001/repo/src/text_utils.py"],
+  "commands_run": [{"command":"python -m pytest -q","executed":true,"exit_code":0,"summary":"EXAMPLE ONLY"}],
+  "tests": [{"command":"python -m pytest -q","status":"PASS","details":"EXAMPLE ONLY"}],
+  "acceptance_results": [
+    {"criterion":"All existing tests pass.","status":"PASS","evidence":"EXAMPLE ONLY"},
+    {"criterion":"Behavior matches the declared requirements.","status":"PASS","evidence":"EXAMPLE ONLY"},
+    {"criterion":"No unrelated file changes are made.","status":"PASS","evidence":"EXAMPLE ONLY"}
+  ],
+  "clarifications_count": 0,
+  "unrelated_changes": [],
+  "evidence_refs": ["EXAMPLE:test-output","EXAMPLE:changed-files","EXAMPLE:summary"],
+  "limitations": ["This file is a schema example and is not execution evidence."],
+  "candidate_hash_after": null
+}

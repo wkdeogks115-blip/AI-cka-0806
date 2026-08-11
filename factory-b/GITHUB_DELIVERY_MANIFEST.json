@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "wkdeogks115-blip/AI-cka-0806",
+  "branch": "factory-b/f5-delivery-rehearsal-001",
+  "target_prefix": "factory-b/",
+  "source_candidate": "FACTORY_B_V1_F4A_LOCAL_QUALIFIED_CANDIDATE.zip",
+  "source_candidate_sha256": "43ad273111fd5fc7380a2bcd50d024664462390cb4218882c5801438dfa614cc",
+  "release_level": "GITHUB_BRANCH_DRAFT_PR_REHEARSAL",
+  "main_branch_mutation": false,
+  "files": [
+    {"path": ".github/workflows/factory-b-f5-rehearsal.yml", "sha256": "7201dbbac207d44d693d27b7f59ba3ff0bc5cb2fa493356fa8c6138841b2e11c"},
+    {"path": "factory-b/FACTORY_B_V1_STATE.yaml", "sha256": "b4d4faf6ce95448edc3bc7f31365dc9d10fc85f5c823ea5ab9af176d90a5b352"},
+    {"path": "factory-b/NEXT_PHASE_TASK.md", "sha256": "9705d898f319aa0df8cac3c6524bd8d47175761ff3f6b5749a76e7fa6c881781"},
+    {"path": "factory-b/README.md", "sha256": "1337c3927f96c9ce1d890590a60984225cdf40636a7a3e7ea94a1ce6ccf111cb"},
+    {"path": "factory-b/docs/ANSWER_PACK_INTEGRATION.md", "sha256": "e01ed50f5bad574126f5d9b72fdb976e4d0a294ea149af978ade3a46bedba2af"},
+    {"path": "factory-b/qualification/handoff-independence-task-001/repo/AGENTS.md", "sha256": "a377e290d5f0d15cc213a48139eaa5535f05f6779fbd688e9eb713bb8ed8c8fb"},
+    {"path": "factory-b/qualification/handoff-independence-task-001/repo/HANDOFF.md", "sha256": "7ebb5e37dd522e06011b5d17458988b12d0d698396f65e8160a3e37250bab80f"},
+    {"path": "factory-b/qualification/handoff-independence-task-001/repo/src/text_utils.py", "sha256": "5f695efe73c16c84e65534aabc57e2abf541cf7fd33d8cc9bd1396b28424016b"},
+    {"path": "factory-b/qualification/handoff-independence-task-001/repo/tests/test_text_utils.py", "sha256": "8c873f92833756cc80cbf86c7eb8782c0fb78afd07ca7eb2d339ff79ce99ec20"},
+    {"path": "factory-b/tools/qualification_preflight.py", "sha256": "2156f3a3ddd6cc74100ee6193a4e64118d814570294584d8ee7fc223fd0b438f"}
+  ]
+}
