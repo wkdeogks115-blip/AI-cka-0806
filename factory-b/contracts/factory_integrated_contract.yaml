@@ -1,0 +1,37 @@
+schema_version: 0.3.0
+artifact: FACTORY_B_V1_IntegratedFactory_PREACTIVE_CANDIDATE_v0_3_0
+control_owner: portable_ai_orchestrator_v2
+factory_role: build_handoff_release_candidate_plane
+factory_owned_scope:
+  - ARTIFACT_TYPE_GATE
+  - ASSETIZATION_GATE
+  - ARTIFACT_CONTRACT_6W_PLUS
+  - IMPLEMENTATION_HANDOFF
+  - HANDOFF_INDEPENDENCE_READINESS
+  - CODEX_REPO_HANDOFF_ASSETS
+  - GITHUB_CANDIDATE_WORKFLOW_CONTRACT
+  - RELEASE_CONTRACT
+  - ACTIVE_V1_ACTIVATION_GATE
+portable_owned_scope:
+  - top_level_work_control
+  - risk_and_verification_policy
+  - material_delta_primitive
+  - evidence_promotion
+  - technical_pass_gate
+  - generic_adapter_contract_validation
+strict_non_ownership:
+  - final_approval
+  - portable_project_state_write
+  - portable_adapter_registry
+  - portable_ledger_persistence
+  - portable_delivery_executor
+  - actual_model_inference
+  - actual_codex_execution
+principles:
+  - implement_full_factory_surface_once_then_validate_layers_independently
+  - never_promote_scaffold_to_actual_execution_evidence
+  - branch_and_draft_pr_are_candidate_delivery_not_final_release
+  - active_v1_requires_actual_evidence_and_external_final_approval
+  - no_router_stack
+  - no_factory_self_final_approval
+  - no_material_delta_no_version_bump
