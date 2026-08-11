@@ -1,0 +1,22 @@
+{
+  "as_of_kst": "2026-08-12T08:19:00+09:00",
+  "decision_type": "ACTUAL_GITHUB_PORTFOLIO_AUDIT",
+  "policy": "REFERENCE_OR_WRAP_BEFORE_BUILD / NO_DESTRUCTIVE_DELETE_WITHOUT_SEPARATE_GATE",
+  "repos": [
+    {"repo":"wkdeogks115-blip/rkskekfk123","purpose":"읽어드림 Figma/디자인 Canonical GitHub Project","decision":"KEEP","canonical_role":"READ_EODREAM_DESIGN_SOURCE_TRUTH","overlap":"LOW","action_now":"NONE"},
+    {"repo":"wkdeogks115-blip/dh-setup-center-web","purpose":"DH 세팅센터 실제 정적 홈페이지 Source + 운영 기준","decision":"KEEP","canonical_role":"DH_WEBSITE_SOURCE","overlap":"COMPLEMENTARY_WITH_DH_CONTROL_ARCHIVE","action_now":"NONE"},
+    {"repo":"wkdeogks115-blip/DH-","purpose":"DH 세팅센터 제작·운영 Control Archive / AI continuity","decision":"KEEP_SEPARATE","canonical_role":"DH_CONTROL_ARCHIVE","overlap":"COMPLEMENTARY_WITH_DH_WEBSITE_SOURCE","action_now":"DO_NOT_MERGE_WITH_SOURCE_REPO"},
+    {"repo":"wkdeogks115-blip/AI-cka-0806","purpose":"AI 오케스트레이션·품질예산 연구소 / Factory B evidence chain","decision":"KEEP","canonical_role":"AI_ORCHESTRATION_RESEARCH","overlap":"LOW_WITH_PRODUCT_REPOS","action_now":"USE_AS_PORTFOLIO_AUDIT_HOME"},
+    {"repo":"wkdeogks115-blip/orca-ai-cowork-runtime-","purpose":"ORCA AI COWORK portable handoff/governance/runtime design pack","decision":"KEEP_CANONICAL_ORCA","canonical_role":"ORCA_CONTROL_HANDOFF","overlap":"HIGH_WITH_TOKEN_EFFICIENCY_REPO","action_now":"CANONICAL_FOR_ORCA_GOVERNANCE"},
+    {"repo":"wkdeogks115-blip/orca-ai-token-efficiency-multiai-cowork-v3","purpose":"ORCA token-efficiency / Antigravity usage bridge patch & evidence kit","decision":"MERGE_LATER_THEN_ARCHIVE_CANDIDATE","canonical_role":"ORCA_SPECIALIST_PATCH_EVIDENCE","overlap":"HIGH_WITH_ORCA_RUNTIME","action_now":"KEEP_UNTIL_1_4_176_RUNTIME_VALIDATION; THEN_PORT_VERIFIED_DELTA_ONLY"},
+    {"repo":"wkdeogks115-blip/bochanco-orca-house","purpose":"README-only ORCA stub","decision":"RETIRE_CANDIDATE","canonical_role":"NONE","overlap":"HIGH_BY_NAME_INTENT_WITH_ORCA","action_now":"NO_NEW_WORK; DO_NOT_USE_AS_ORCA_HOME"},
+    {"repo":"wkdeogks115-blip/-","purpose":"empty repository","decision":"RETIRE_CANDIDATE","canonical_role":"NONE","overlap":"NONE_CONTENT","action_now":"NO_NEW_WORK"}
+  ],
+  "portfolio_target": {
+    "keep_active": ["wkdeogks115-blip/rkskekfk123","wkdeogks115-blip/dh-setup-center-web","wkdeogks115-blip/DH-","wkdeogks115-blip/AI-cka-0806","wkdeogks115-blip/orca-ai-cowork-runtime-"],
+    "temporary_satellite": ["wkdeogks115-blip/orca-ai-token-efficiency-multiai-cowork-v3"],
+    "retire_candidates": ["wkdeogks115-blip/bochanco-orca-house","wkdeogks115-blip/-"]
+  },
+  "destructive_actions_performed": false,
+  "reason_no_delete": "Repository deletion/archival is irreversible or externally consequential; current execution creates a reversible decision candidate first."
+}
