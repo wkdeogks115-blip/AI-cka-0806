@@ -1,0 +1,1 @@
+첨부한 Factory B 바로사용 체험판 ZIP의 README_KR.md와 CURRENT_SNAPSHOT.json을 먼저 읽어. Google Drive의 live CURRENT에 접근 가능하면 그것을 우선 fresh-read하고, 없으면 snapshot을 기준으로 Factory B 체험판 모드에서 계속 진행해. 체험판 결과를 ACTIVE/실제 External Agent/TRUE 독립검수 증거로 승격하지 말고, 새 실질 근거가 있을 때만 Candidate/상태를 갱신해.
