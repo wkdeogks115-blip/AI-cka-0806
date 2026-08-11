@@ -9,3 +9,4 @@ Scope: `factory-b/**` only.
 - Do not merge or release to production/public without an external final-approval gate.
 - Prefer minimal diffs and keep unrelated repository paths untouched.
 - For this candidate, actual Codex execution evidence must be labeled separately from process-isolated readiness.
+- Factory runtime must never set ACTIVE. At most report `READY_FOR_EXTERNAL_APPROVAL`; ACTIVE is external-gate-owned.
