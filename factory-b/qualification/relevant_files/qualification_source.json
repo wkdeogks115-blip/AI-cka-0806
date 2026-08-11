@@ -2,8 +2,17 @@
   "title": "Factory B Handoff Qualification Artifact",
   "version": "1.0",
   "rules": [
-    {"id": "R1", "text": "Use only explicitly listed files."},
-    {"id": "R2", "text": "Do not infer hidden chat context."},
-    {"id": "R3", "text": "Produce deterministic evidence with criterion IDs."}
+    {
+      "id": "R1",
+      "text": "Use only explicitly listed files."
+    },
+    {
+      "id": "R2",
+      "text": "Do not infer hidden chat context."
+    },
+    {
+      "id": "R3",
+      "text": "Produce deterministic evidence with criterion IDs."
+    }
   ]
 }
