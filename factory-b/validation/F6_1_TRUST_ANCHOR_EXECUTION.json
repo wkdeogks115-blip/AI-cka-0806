@@ -1,0 +1,17 @@
+{
+  "source_package": "FACTORY_B_V1_F5_1_TRANSFER_SYSTEM_CANDIDATE.zip",
+  "source_manifest_sha256": "47c9582483e8aa11344f167661ab83a92547e4690893a81f209c890dea58ffbd",
+  "real_anchored_verdict": "PASS",
+  "real_verified_files": 200,
+  "real_declared_files": 200,
+  "real_integrity_scope": "ANCHORED_MANIFEST",
+  "real_manifest_hash_match": true,
+  "coordinated_tamper_unanchored_verdict": "PASS",
+  "coordinated_tamper_unanchored_scope": "SELF_CONSISTENCY_ONLY",
+  "coordinated_tamper_anchored_verdict": "FAIL",
+  "coordinated_tamper_anchored_manifest_hash_match": false,
+  "coordinated_tamper_anchored_errors": [
+    "manifest-sha256-mismatch"
+  ],
+  "evidence_status": "VERIFIED_LOCAL_EXECUTION"
+}
