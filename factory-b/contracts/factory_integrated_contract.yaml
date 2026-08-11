@@ -1,5 +1,5 @@
-schema_version: 0.3.0
-artifact: FACTORY_B_V1_IntegratedFactory_PREACTIVE_CANDIDATE_v0_3_0
+schema_version: 0.3.1
+artifact: FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_1
 control_owner: portable_ai_orchestrator_v2
 factory_role: build_handoff_release_candidate_plane
 factory_owned_scope:
@@ -11,7 +11,7 @@ factory_owned_scope:
   - CODEX_REPO_HANDOFF_ASSETS
   - GITHUB_CANDIDATE_WORKFLOW_CONTRACT
   - RELEASE_CONTRACT
-  - ACTIVE_V1_ACTIVATION_GATE
+  - ACTIVE_V1_READINESS_GATE
 portable_owned_scope:
   - top_level_work_control
   - risk_and_verification_policy
@@ -35,3 +35,8 @@ principles:
   - no_router_stack
   - no_factory_self_final_approval
   - no_material_delta_no_version_bump
+
+activation_boundary:
+  factory_can_activate: false
+  max_factory_result: READY_FOR_EXTERNAL_APPROVAL
+  active_state_owner: EXTERNAL_APPROVAL_GATE
