@@ -16,12 +16,12 @@
   ],
   "acceptance_criteria": [
     "Valid Factory package passes integrity verification.",
-    "Hash tampering, missing/unexpected files, traversal paths, symlinks, and duplicate manifest paths are detected.",
+    "Hash tampering, missing/unexpected files, traversal paths, symlinks, duplicate manifest paths, and unreadable/corrupt package members are detected.",
     "CLI returns machine-readable receipt and non-zero exit on failure.",
     "Artifact explicitly reports semantic correctness, evidence sufficiency, and release approval as NOT_ASSESSED.",
     "Artifact tests and full Factory regression suite pass.",
     "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "f65cb29d3f69c4328bbb8c9da35a7c98d699b1eb79228a103ca30ac0f502a788"
+  "candidate_hash": "05626259ceb76a45efb9c4c466179c2a05d63c70c596ceabe7dacb2e3cf07c4b"
 }
