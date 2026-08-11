@@ -1,0 +1,2 @@
+OUT_OF_SCOPE_NEGATIVE_CONTROL
+This file intentionally violates the Factory B candidate path scope. Do not merge.
