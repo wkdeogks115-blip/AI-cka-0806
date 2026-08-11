@@ -1,13 +1,10 @@
 {
-  "artifact": "FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_3",
+  "artifact": "FACTORY_B_V1_IntegratedFactory_PATCH_CANDIDATE_v0_3_4",
   "repo": "wkdeogks115-blip/AI-cka-0806",
   "base": "main",
-  "branch": "factory-b-v1-integration-v0.3.3",
+  "branch": "factory-b-v1-integration-v0.3.4",
   "pr_mode": "DRAFT",
-  "scope": [
-    "factory-b/**",
-    ".github/workflows/factory-b-candidate.yml"
-  ],
+  "scope": ["factory-b/**", ".github/workflows/factory-b-candidate.yml"],
   "merge_authorized": false,
   "active_release": false,
   "codex_execution": "UNVERIFIED",
@@ -18,5 +15,6 @@
   "candidate_ci_trust": "ADVISORY_ONLY",
   "candidate_ci_authority": false,
   "external_pr_scope_audit_required": true,
-  "external_pr_scope_gate": "FACTORY_B_V1_ExternalPRScopeGate_PATCH_CANDIDATE_v0_1_1.zip"
+  "external_pr_scope_gate": "FACTORY_B_V1_ExternalPRScopeGate_PATCH_CANDIDATE_v0_1_2.zip",
+  "external_scope_identity_binding": "EXPECTED_REPO_PR_HEAD_PLUS_CHANGED_FILES_DIGEST"
 }
