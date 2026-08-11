@@ -7,8 +7,12 @@ quality, safety, evidence sufficiency, or release approval. Those remain outside
 this artifact (Portable/control-plane/reviewer responsibilities).
 
 ## Supported inputs
-- a directory containing `MANIFEST.json`
+- a directory containing root `MANIFEST.json`
 - a ZIP containing root `MANIFEST.json`
+- a ZIP containing exactly one safe wrapper directory whose direct child is `MANIFEST.json`
+
+Ambiguous/multiple wrapper roots are rejected. ZIP member read/CRC failures are
+returned as a machine-readable `FAIL` receipt rather than escaping as an exception.
 
 The manifest contract supported by v1 is the Factory B manifest shape:
 `schema_version`, `candidate`, `file_count`, and `files[]` where each file row
