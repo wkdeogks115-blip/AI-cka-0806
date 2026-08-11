@@ -1,10 +1,10 @@
 product_id: FACTORY_B_V1
 name: AI 제작소 — Harness B Factory
-version: 1.0.0-f4a-local-qualified-candidate
+version: 1.0.0-f5-github-rehearsal-pass-candidate
 status: CANDIDATE
 architecture: THIN_6_MODULE_PLUS_BLUEPRINT_SUPPORT_PLUS_SHADOW_BRIDGE
 portable_v2_binding: NOT_BOUND_UNVERIFIED
-github_repository: null
+github_repository: wkdeogks115-blip/AI-cka-0806
 core_modules:
   artifact_type_gate: CREATED
   assetization_gate: CREATED
@@ -32,18 +32,22 @@ local_validation:
 runtime_validation:
   portable_bridge: MOCK_ONLY_PASS_ACTUAL_UNBOUND
   codex_handoff_independence: STATIC_REHEARSAL_PASS_ACTUAL_AGENT_NOT_RUN
-  github_delivery: NOT_RUN
+  github_delivery: F5_REHEARSAL_VERIFIED_PASS_BRANCH_DRAFT_PR_CI_READBACK
   real_project_e2e: NOT_RUN
   first_artifact_pilot: SIMULATED_PARTIAL_PASS_ACTUAL_VERIFICATION_BLOCKED
   multi_artifact_pilots: POLICY_SKILL_CODE_LOCAL_PASS_SHADOW_SIMULATED
+  github_full_factory_delivery: NOT_RUN
 next_actions:
-- run real implementation-agent handoff independence test using qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001
-- bind actual portable_v2 contracts and compare against shadow behavior when source/contracts
-  are available
-- designate Factory GitHub repository and run candidate branch CI/read-back/draft
-  PR
+- run real implementation-agent handoff independence test using the GitHub-hosted
+  qualification fixture or exported task ZIP
+- after agent result, measure clarification count, acceptance, actual tests, unrelated
+  diff, and evidence completeness
+- bind actual portable_v2 contracts and run shadow-vs-actual differential tests when
+  source/contracts are available
+- after real-agent evidence, decide whether to expand the GitHub candidate from rehearsal
+  subset to full Factory source
 - run Factory self-host qualification on one useful real artifact
-- consider ACTIVE only after actual external evidence closes these blockers
+- consider ACTIVE only after actual external evidence closes remaining blockers
 generated_at: '2026-08-11T07:24:00+09:00'
 last_local_validation_at: '2026-08-11T07:24:00+09:00'
 blueprint_foundation:
@@ -63,3 +67,17 @@ shadow_portable_v2_simulation:
   f4_pilot_shadow_gate: SIMULATED_PASS
   actual_portable_binding: UNVERIFIED
   promotion_to_bound_verified_allowed: false
+github_repository_role: PARENT_LAB_REPO_CANDIDATE_TARGET
+f5_github_rehearsal:
+  status: VERIFIED_PASS
+  branch: factory-b/f5-delivery-rehearsal-001
+  draft_pr: 3
+  head_sha: 4d9927c4128290a8a68bed44c321175fa2026e71
+  changed_files: 11
+  ci_workflow: Factory B F5 Delivery Rehearsal
+  ci_run_id: 31459020525
+  ci_job_id: 93678632695
+  ci_conclusion: success
+  read_back: PASS_MANIFEST_AND_WORKFLOW
+  main_branch_mutated: false
+  merge_performed: false
