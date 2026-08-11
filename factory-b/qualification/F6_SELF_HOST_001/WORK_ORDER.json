@@ -4,9 +4,24 @@
   "blueprint_id": "CODE_CHANGE",
   "goal": "Create a reusable deterministic verifier for Factory package MANIFEST/hash/path integrity without duplicating Portable v2 semantic verification or approval logic.",
   "status": "FROZEN",
-  "source_refs": ["Factory B F5.1 package manifests", "F6 qualification requirement"],
-  "constraints": ["Python standard library only for the produced artifact.", "Do not claim semantic correctness, evidence sufficiency, or release approval.", "Reject unsafe paths and symlinks.", "Do not add a new Factory Core module."],
-  "acceptance_criteria": ["Valid Factory package passes integrity verification.", "Hash tampering, missing/unexpected files, traversal paths, symlinks, and duplicate manifest paths are detected.", "CLI returns machine-readable receipt and non-zero exit on failure.", "Artifact explicitly reports semantic correctness, evidence sufficiency, and release approval as NOT_ASSESSED.", "Artifact tests and full Factory regression suite pass."],
+  "source_refs": [
+    "Factory B F5.1 package manifests",
+    "F6 qualification requirement"
+  ],
+  "constraints": [
+    "Python standard library only for the produced artifact.",
+    "Do not claim semantic correctness, evidence sufficiency, or release approval.",
+    "Reject unsafe paths and symlinks.",
+    "Do not add a new Factory Core module."
+  ],
+  "acceptance_criteria": [
+    "Valid Factory package passes integrity verification.",
+    "Hash tampering, missing/unexpected files, traversal paths, symlinks, and duplicate manifest paths are detected.",
+    "CLI returns machine-readable receipt and non-zero exit on failure.",
+    "Artifact explicitly reports semantic correctness, evidence sufficiency, and release approval as NOT_ASSESSED.",
+    "Artifact tests and full Factory regression suite pass.",
+    "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied."
+  ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "efedb845ed1700b61eed1765364faadc631ddaca7eaa03152cedeb716582ed9b"
+  "candidate_hash": "f65cb29d3f69c4328bbb8c9da35a7c98d699b1eb79228a103ca30ac0f502a788"
 }
