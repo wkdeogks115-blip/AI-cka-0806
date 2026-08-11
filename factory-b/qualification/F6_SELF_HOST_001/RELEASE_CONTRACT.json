@@ -1,8 +1,8 @@
 {
   "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
   "target": "GITHUB_PR",
-  "candidate_hash": "f65cb29d3f69c4328bbb8c9da35a7c98d699b1eb79228a103ca30ac0f502a788",
-  "verification_state": "PASS",
+  "candidate_hash": "05626259ceb76a45efb9c4c466179c2a05d63c70c596ceabe7dacb2e3cf07c4b",
+  "verification_state": "PATCH_REVALIDATION_PENDING",
   "approval_state": "SCOPED_APPROVED",
   "independent_approval": "PENDING",
   "read_back_required": true,
@@ -10,6 +10,7 @@
   "notes": [
     "F6 candidate only; do not merge until independent review gate is satisfied.",
     "Integrity verifier is a support artifact, not a new Core module.",
-    "F6.1 patch adds optional external MANIFEST SHA-256 trust anchor after adversarial coordinated-tamper finding; review must target the new hash."
+    "F6.1 external MANIFEST SHA-256 trust-anchor behavior is preserved.",
+    "PR #12 reproduced a corrupt ZIP member escaping as BadZipFile; F6.2 requires machine-readable FAIL instead."
   ]
 }
