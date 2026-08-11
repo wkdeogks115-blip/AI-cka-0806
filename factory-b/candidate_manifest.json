@@ -18,5 +18,5 @@
   "candidate_ci_trust": "ADVISORY_ONLY",
   "candidate_ci_authority": false,
   "external_pr_scope_audit_required": true,
-  "external_pr_scope_gate": "FACTORY_B_V1_ExternalPRScopeGate_CANDIDATE_v0_1_0.zip"
+  "external_pr_scope_gate": "FACTORY_B_V1_ExternalPRScopeGate_PATCH_CANDIDATE_v0_1_1.zip"
 }
