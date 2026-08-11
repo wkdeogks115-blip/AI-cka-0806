@@ -1,20 +1,28 @@
-schema_version: 1.0
+schema_version: 1.1
 activation_target: FACTORY_B_V1_ACTIVE
-required:
+factory_activation_authority: NONE
+factory_max_status: READY_FOR_EXTERNAL_APPROVAL
+technical_prerequisites:
   portable_baseline_hashes_match: true
   thin_bridge_hash_match: true
   minimal_factory_contract_tests: PASS
   process_isolated_handoff_readiness: PASS
   github_candidate_branch: VERIFIED
   github_draft_pr: VERIFIED
+  github_candidate_ci: PASS
   codex_repo_handoff_assets: PRESENT
   actual_codex_execution: VERIFIED
   actual_codex_required_tests: PASS
   handoff_independence_actual: VERIFIED
+external_only:
   external_final_approval: VERIFIED
+  active_state_write: EXTERNAL_ONLY
 forbidden_shortcuts:
   - process_isolated_readiness_as_actual_codex_execution
   - github_pr_open_as_final_approval
+  - github_ci_as_semantic_actual_pass
   - static_or_sandbox_pass_as_semantic_actual_pass
   - factory_self_final_approval
-on_missing_required: PREACTIVE_CANDIDATE
+  - factory_runtime_returning_ACTIVE
+on_missing_technical_prerequisite: PREACTIVE_CANDIDATE
+on_all_technical_prerequisites: READY_FOR_EXTERNAL_APPROVAL
