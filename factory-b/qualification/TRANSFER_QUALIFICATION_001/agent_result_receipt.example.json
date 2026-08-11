@@ -2,9 +2,9 @@
   "schema_version": "1.0.0",
   "task_id": "FB-TRANSFER-QUAL-001",
   "status": "COMPLETED",
-  "packet_hash": "3cc427d9b6a8c094e3a92e62c04d314345a40520dbbfe4a6b45a6b1d36b7a109",
+  "packet_hash": "8c63f56e3e91c25e1714982f054c7c85d96a7ac87fa20f319531c008030b3cf9",
   "agent_label": "EXAMPLE_ONLY_NOT_EXECUTED",
-  "changed_files": ["qualification/HANDOFF_INDEPENDENCE_REHEARSAL_001/repo/src/text_utils.py"],
+  "changed_files": ["qualification/transfer-qualification-001/repo/src/text_utils.py"],
   "commands_run": [{"command":"python -m pytest -q","executed":true,"exit_code":0,"summary":"EXAMPLE ONLY"}],
   "tests": [{"command":"python -m pytest -q","status":"PASS","details":"EXAMPLE ONLY"}],
   "acceptance_results": [
