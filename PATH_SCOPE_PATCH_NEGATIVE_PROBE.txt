@@ -1,0 +1,2 @@
+OUT_OF_SCOPE_NEGATIVE_CONTROL_V032
+This file intentionally violates Factory B path scope. Do not merge.
