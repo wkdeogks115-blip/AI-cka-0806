@@ -1,4 +1,4 @@
-# Factory Package Integrity Verifier v1.0.2-patch-candidate
+# Factory Package Integrity Verifier v1.0.3-patch-candidate
 
 A deterministic integrity checker for Factory B artifact/release packages.
 
@@ -21,6 +21,10 @@ The receipt reports `integrity_scope` as `SELF_CONSISTENCY_ONLY` or `ANCHORED_MA
 Unreadable directory members and corrupt/unreadable ZIP members are fail-closed: the verifier
 records a machine-readable read error and returns `verdict=FAIL` instead of allowing the read
 exception to escape.
+
+Directory mode rejects a symlink subject root and checks every path component from the package
+root through each manifest-declared member before reading bytes. Any symlink component or resolved
+target outside the resolved package root is recorded in `unsafe_paths` and fails closed.
 
 ## Supported inputs
 - a directory containing `MANIFEST.json`

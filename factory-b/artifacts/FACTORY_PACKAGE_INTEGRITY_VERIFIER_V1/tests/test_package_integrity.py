@@ -70,6 +70,31 @@ def test_directory_symlink_rejected(tmp_path):
     assert r["verdict"]=="FAIL" and any("symlink" in x for x in r["unsafe_paths"])
 
 
+def test_directory_parent_symlink_component_rejected_before_member_verification(tmp_path):
+    outside=tmp_path/"outside"; outside.mkdir(); (outside/"a.txt").write_text("secret")
+    root=tmp_path/"p"; root.mkdir()
+    m=_manifest({"linkdir/a.txt":b"secret"}); (root/"MANIFEST.json").write_text(json.dumps(m))
+    try: (root/"linkdir").symlink_to(outside,target_is_directory=True)
+    except OSError: return
+    r=verify_package(root)
+    assert r["verdict"]=="FAIL"
+    assert r["verified_files"]==0
+    assert "linkdir/a.txt:symlink-component:linkdir" in r["unsafe_paths"]
+    assert "linkdir/a.txt" not in r["hash_mismatches"]
+
+
+def test_directory_subject_root_symlink_rejected_before_member_verification(tmp_path):
+    real_root=tmp_path/"real"; real_root.mkdir(); (real_root/"a.txt").write_text("a")
+    m=_manifest({"a.txt":b"a"}); (real_root/"MANIFEST.json").write_text(json.dumps(m))
+    linked_root=tmp_path/"linked-root"
+    try: linked_root.symlink_to(real_root,target_is_directory=True)
+    except OSError: return
+    r=verify_package(linked_root)
+    assert r["verdict"]=="FAIL"
+    assert r["verified_files"]==0
+    assert "subject-root:symlink" in r["unsafe_paths"]
+
+
 def test_duplicate_manifest_path_detected(tmp_path):
     digest=hashlib.sha256(b"a").hexdigest()
     m={"schema_version":"1.0.0","candidate":"TEST","file_count":2,"files":[

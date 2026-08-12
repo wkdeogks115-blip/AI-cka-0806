@@ -104,14 +104,45 @@ def _finalize(r: dict[str, Any]) -> dict[str, Any]:
     return r
 
 
+def _directory_member_path_issue(root: Path, root_resolved: Path, rel: str) -> str | None:
+    """Return an unsafe-path reason before directory member bytes are read."""
+    current = root
+    for part in PurePosixPath(rel).parts:
+        current = current / part
+        try:
+            if current.is_symlink():
+                component = current.relative_to(root).as_posix()
+                return f"{rel}:symlink-component:{component}"
+        except OSError as e:
+            component = current.relative_to(root).as_posix()
+            return f"{rel}:path-component-check-error:{component}:{type(e).__name__}"
+    try:
+        target_resolved = current.resolve(strict=False)
+    except OSError as e:
+        return f"{rel}:resolve-error:{type(e).__name__}"
+    try:
+        target_resolved.relative_to(root_resolved)
+    except ValueError:
+        return f"{rel}:resolved-outside-package-root"
+    return None
+
+
 def verify_directory(root: Path, expected_manifest_sha256: str | None = None) -> dict[str, Any]:
     r = _base_receipt(root, "DIRECTORY", expected_manifest_sha256)
-    manifest_path = root / "MANIFEST.json"
-    if not manifest_path.is_file():
-        r["errors"].append("MANIFEST.json-not-found")
+    if root.is_symlink():
+        r["unsafe_paths"].append("subject-root:symlink")
         return _finalize(r)
+    try:
+        root_resolved = root.resolve(strict=True)
+    except OSError as e:
+        r["errors"].append(f"subject-root-resolve-error:{type(e).__name__}")
+        return _finalize(r)
+    manifest_path = root / "MANIFEST.json"
     if manifest_path.is_symlink():
         r["unsafe_paths"].append("MANIFEST.json:symlink")
+        return _finalize(r)
+    if not manifest_path.is_file():
+        r["errors"].append("MANIFEST.json-not-found")
         return _finalize(r)
     r["manifest_found"] = True
     try:
@@ -145,6 +176,10 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
             continue
         declared.add(rel)
         p = root / Path(*PurePosixPath(rel).parts)
+        path_issue = _directory_member_path_issue(root, root_resolved, rel)
+        if path_issue is not None:
+            r["unsafe_paths"].append(path_issue)
+            continue
         if not p.exists():
             r["missing"].append(rel)
             continue
