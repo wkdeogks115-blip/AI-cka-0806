@@ -1,4 +1,4 @@
-# Factory Package Integrity Verifier v1.0.3-patch-candidate
+# Factory Package Integrity Verifier v1.0.4-patch-candidate
 
 A deterministic integrity checker for Factory B artifact/release packages.
 
@@ -22,6 +22,10 @@ Unreadable directory members and corrupt/unreadable ZIP members are fail-closed:
 records a machine-readable read error and returns `verdict=FAIL` instead of allowing the read
 exception to escape.
 
+Malformed non-object entries inside `MANIFEST.json` `files[]` are also fail-closed. They are
+recorded as manifest-row errors and are skipped during byte verification instead of raising an
+uncaught attribute error.
+
 Directory mode rejects a symlink subject root and checks every path component from the package
 root through each manifest-declared member before reading bytes. Any symlink component or resolved
 target outside the resolved package root is recorded in `unsafe_paths` and fails closed.
@@ -32,8 +36,8 @@ target outside the resolved package root is recorded in `unsafe_paths` and fails
 - a ZIP containing exactly one safe wrapper root with `MANIFEST.json`
 
 The manifest contract supported by v1 is the Factory B manifest shape:
-`schema_version`, `candidate`, `file_count`, and `files[]` where each file row contains
-`path`, `sha256`, and optional `size`.
+`schema_version`, `candidate`, `file_count`, and `files[]` where each valid file row is an object
+containing `path`, `sha256`, and optional `size`.
 
 ## CLI
 
