@@ -166,6 +166,8 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
     r["declared_files"] = len(rows)
     declared: set[str] = set()
     for row in rows:
+        if not isinstance(row, dict):
+            continue
         raw = row.get("path")
         ok, rel = _safe_manifest_path(raw)
         if not ok:
@@ -272,6 +274,8 @@ def verify_zip(path: Path, expected_manifest_sha256: str | None = None) -> dict[
         r["declared_files"] = len(rows)
         declared: set[str] = set()
         for row in rows:
+            if not isinstance(row, dict):
+                continue
             raw = row.get("path")
             ok, rel = _safe_manifest_path(raw)
             if not ok:
