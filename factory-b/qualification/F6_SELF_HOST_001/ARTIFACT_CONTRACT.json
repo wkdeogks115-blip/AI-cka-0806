@@ -6,7 +6,7 @@
   "why": "Every reusable Factory package needs a cheap independent byte/path integrity check before semantic verification or release review",
   "when": "After package creation, after transport/read-back, and before higher-level evidence or release decisions",
   "where": "Local Linux, GitHub Actions, or another environment with Python 3.11+",
-  "how": "Read MANIFEST.json, validate declared rows, reject a symlink directory root, inspect every directory-member path component and resolved-root containment before reading bytes, compare bytes/sizes/paths, optionally compare the manifest itself to an externally frozen SHA-256 trust anchor, convert package-member read failures into machine-readable FAIL evidence, and emit a JSON receipt",
+  "how": "Read MANIFEST.json, validate declared rows, reject malformed non-object file rows without raising, reject a symlink directory root, inspect every directory-member path component and resolved-root containment before reading bytes, compare bytes/sizes/paths, optionally compare the manifest itself to an externally frozen SHA-256 trust anchor, convert package-member read failures into machine-readable FAIL evidence, and emit a JSON receipt",
   "inputs": [
     "Factory package directory or ZIP containing MANIFEST.json; ZIP may use exactly one safe wrapper root"
   ],
@@ -25,7 +25,7 @@
   ],
   "approval_boundary": "The verifier may report byte/path/readability integrity only; external release still requires the governing Release Contract and scoped approval",
   "failure_modes": [
-    "Malformed or missing manifest",
+    "Malformed or missing manifest, including non-object files[] rows",
     "Hash/size mismatch",
     "Missing/unexpected file",
     "Path traversal or absolute path",
@@ -35,29 +35,32 @@
   ],
   "recovery": [
     "Rebuild the package from the frozen source candidate and regenerate the manifest",
-    "Treat unreadable/corrupt members as FAIL evidence rather than allowing an exception to escape"
+    "Treat malformed/unreadable/corrupt members as FAIL evidence rather than allowing an exception to escape"
   ],
   "success_criteria": [
     "Current Factory package verifies",
     "Negative mutation tests are detected",
     "Corrupt ZIP member returns a machine-readable FAIL receipt",
+    "Malformed non-object MANIFEST files[] row returns FAIL without an uncaught exception",
     "Directory parent-symlink and subject-root-symlink negative controls fail with zero verified files",
     "Full regression suite passes",
     "Anchored mode rejects coordinated payload+manifest substitution against the frozen manifest hash"
   ],
-  "test_status": "LOCAL_PATCH_TESTS_PASS_13_OF_13",
+  "test_status": "GITHUB_PATCH_TESTS_PASS_14_OF_14_HASH_BOUNDARY_REVALIDATION_PENDING",
   "known_limitations": [
     "Without an external expected MANIFEST.json SHA-256, PASS proves self-consistency only and cannot detect coordinated payload+manifest substitution",
     "v1 supports the current Factory B MANIFEST.json shape",
     "ZIP wrapper support is limited to exactly one safe top-level wrapper directory",
+    "Concurrent filesystem mutation between path validation and byte read is not claimed to be hardened",
     "It proves byte/path/readability consistency, not semantic quality, provenance truth, or release approval"
   ],
-  "version": "1.0.3-patch-candidate",
-  "candidate_hash": "426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b",
+  "version": "1.0.4-patch-candidate",
+  "candidate_hash": "3cd8cd84fb6c4ca69bc415aa4ae81049b275a672e5b27c20c4920565f94dea35",
   "provenance": [
     "FACTORY_B_V1 F6 self-host qualification",
     "F6.1 external MANIFEST SHA-256 trust-anchor patch",
     "PR #12 corrupt ZIP negative-control reproduction",
-    "Gate B MAJOR-001 directory parent-symlink isolation patch"
+    "Gate B MAJOR-001 directory parent-symlink isolation patch",
+    "Supervisor probe PR #19 reproduced non-object MANIFEST row AttributeError on Ubuntu GitHub Actions; minimal loop guard patch then passed 14/14 artifact tests"
   ]
 }
