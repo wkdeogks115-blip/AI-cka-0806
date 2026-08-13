@@ -1,0 +1,108 @@
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import os
+import stat
+import zipfile
+from pathlib import Path
+
+import pytest
+
+MOD_PATH = Path(__file__).resolve().parents[1] / "src" / "package_integrity.py"
+spec = importlib.util.spec_from_file_location("package_integrity", MOD_PATH)
+mod = importlib.util.module_from_spec(spec)
+assert spec.loader
+spec.loader.exec_module(mod)
+verify_package = mod.verify_package
+
+
+def _row(path: str, data: bytes = b"x", size=None):
+    return {"path": path, "sha256": hashlib.sha256(data).hexdigest(), "size": len(data) if size is None else size}
+
+
+def _manifest(rows, **overrides):
+    value = {"schema_version": "1.0.0", "candidate": "REGRESSION", "file_count": len(rows), "files": rows}
+    value.update(overrides)
+    return value
+
+
+def _write_dir(root: Path, files: dict[str, bytes], manifest: dict):
+    root.mkdir()
+    for rel, data in files.items():
+        p = root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(data)
+    (root / "MANIFEST.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+
+def test_manifest_scalar_types_fail_closed(tmp_path):
+    cases = [
+        _manifest([_row("a.txt")], file_count=True),
+        _manifest([_row("a.txt", size=True)]),
+        _manifest([_row("a.txt")], schema_version=None),
+        _manifest([_row("a.txt")], candidate=None),
+    ]
+    for i, manifest in enumerate(cases):
+        root = tmp_path / f"p-{i}"
+        _write_dir(root, {"a.txt": b"x"}, manifest)
+        assert verify_package(root)["verdict"] == "FAIL"
+
+
+def test_noncanonical_and_nul_manifest_paths_fail_closed(tmp_path):
+    for i, path in enumerate(["./a.txt", "d//a.txt", "C:/a.txt", "a\x00b"]):
+        root = tmp_path / f"p-{i}"
+        root.mkdir()
+        (root / "MANIFEST.json").write_text(json.dumps(_manifest([_row(path)])), encoding="utf-8")
+        receipt = verify_package(root)
+        assert receipt["verdict"] == "FAIL"
+
+
+def test_zip_unsafe_directory_entries_fail_closed(tmp_path):
+    variants = []
+    symlink = zipfile.ZipInfo("linkdir/")
+    symlink.create_system = 3
+    symlink.external_attr = (stat.S_IFLNK | 0o777) << 16
+    variants.append((symlink, b"../outside"))
+    traversal = zipfile.ZipInfo("../evil/")
+    traversal.external_attr = (stat.S_IFDIR | 0o755) << 16
+    variants.append((traversal, b""))
+    absolute = zipfile.ZipInfo("/abs/")
+    absolute.external_attr = (stat.S_IFDIR | 0o755) << 16
+    variants.append((absolute, b""))
+
+    for i, (entry, data) in enumerate(variants):
+        zpath = tmp_path / f"unsafe-{i}.zip"
+        with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
+            zf.writestr("a.txt", b"x")
+            zf.writestr("MANIFEST.json", json.dumps(_manifest([_row("a.txt")])))
+            zf.writestr(entry, data)
+        assert verify_package(zpath)["verdict"] == "FAIL"
+
+
+def test_zip_safe_explicit_directory_entry_still_passes(tmp_path):
+    zpath = tmp_path / "safe-dir.zip"
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
+        zf.writestr("d/", b"")
+        zf.writestr("d/a.txt", b"x")
+        zf.writestr("MANIFEST.json", json.dumps(_manifest([_row("d/a.txt")])))
+    assert verify_package(zpath)["verdict"] == "PASS"
+
+
+@pytest.mark.skipif(hasattr(os, "geteuid") and os.geteuid() == 0, reason="root can read chmod-000 directories")
+def test_unreadable_unexpected_directory_fails_closed(tmp_path):
+    root = tmp_path / "pkg"
+    root.mkdir()
+    (root / "a.txt").write_bytes(b"x")
+    (root / "MANIFEST.json").write_text(json.dumps(_manifest([_row("a.txt")])), encoding="utf-8")
+    hidden = root / "hidden"
+    hidden.mkdir()
+    (hidden / "secret.txt").write_text("secret")
+    hidden.chmod(0)
+    try:
+        receipt = verify_package(root)
+    finally:
+        hidden.chmod(0o700)
+    assert receipt["verdict"] == "FAIL"
+    assert any(item.startswith("directory-scan-error:hidden:") for item in receipt["errors"])
