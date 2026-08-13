@@ -8,7 +8,7 @@ CREATE TEMP TABLE v022_lineage_probe (
 
 -- L01: attempt can reference a routing decision from another run.
 INSERT INTO run_attempts(attempt_id,run_id,routing_decision_id,attempt_no,model_id,harness_id,execution_status,attempt_accepted,first_attempt_for_subject,cost_usd,cost_evidence_class,human_intervention)
-VALUES ('L01-A','RSH','DB1',1,'B','H1','PASS',TRUE,TRUE,0.01,'ACTUAL',FALSE);
+VALUES ('L01-A','RSH','DB1',3,'B','H1','PASS',TRUE,TRUE,0.01,'ACTUAL',FALSE);
 INSERT INTO v022_lineage_probe VALUES (
   'L01_ATTEMPT_CAN_REFERENCE_OTHER_RUN_DECISION',
   EXISTS (SELECT 1 FROM run_attempts ra JOIN routing_decisions rd ON rd.routing_decision_id=ra.routing_decision_id WHERE ra.attempt_id='L01-A' AND ra.run_id<>rd.run_id),
@@ -17,7 +17,7 @@ INSERT INTO v022_lineage_probe VALUES (
 
 -- L02: attempt model+harness can disagree with its routing decision selection.
 INSERT INTO run_attempts(attempt_id,run_id,routing_decision_id,attempt_no,model_id,harness_id,execution_status,attempt_accepted,first_attempt_for_subject,cost_usd,cost_evidence_class,human_intervention)
-VALUES ('L02-A','RSH','DSH',2,'B','H1','PASS',TRUE,TRUE,0.01,'ACTUAL',FALSE);
+VALUES ('L02-A','RSH','DSH',4,'B','H1','PASS',TRUE,TRUE,0.01,'ACTUAL',FALSE);
 INSERT INTO v022_lineage_probe VALUES (
   'L02_ATTEMPT_SUBJECT_CAN_DISAGREE_WITH_DECISION',
   EXISTS (SELECT 1 FROM run_attempts ra JOIN routing_decisions rd ON rd.routing_decision_id=ra.routing_decision_id WHERE ra.attempt_id='L02-A' AND (ra.model_id<>rd.selected_model_id OR ra.harness_id<>rd.selected_harness_id)),
