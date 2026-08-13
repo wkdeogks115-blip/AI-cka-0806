@@ -1,4 +1,4 @@
-# Factory Package Integrity Verifier v1.0.4-patch-candidate
+# Factory Package Integrity Verifier v1.0.5-patch-candidate
 
 A deterministic integrity checker for Factory B artifact/release packages.
 
@@ -25,6 +25,9 @@ exception to escape.
 Malformed non-object entries inside `MANIFEST.json` `files[]` are also fail-closed. They are
 recorded as manifest-row errors and are skipped during byte verification instead of raising an
 uncaught attribute error.
+
+Manifest paths containing control characters or `:` are rejected before filesystem/ZIP member lookup,
+preventing embedded-NUL exceptions and Windows drive-prefix/alternate-stream ambiguity.
 
 Directory mode rejects a symlink subject root and checks every path component from the package
 root through each manifest-declared member before reading bytes. Any symlink component or resolved

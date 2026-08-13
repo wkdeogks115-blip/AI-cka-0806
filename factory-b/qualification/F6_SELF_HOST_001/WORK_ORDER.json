@@ -21,8 +21,10 @@
     "CLI returns machine-readable receipt and non-zero exit on failure.",
     "Artifact explicitly reports semantic correctness, evidence sufficiency, and release approval as NOT_ASSESSED.",
     "Artifact tests and full Factory regression suite pass.",
-    "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied."
+    "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied.",
+    "Embedded NUL/control-character manifest paths fail closed without exceptions.",
+    "Colon-bearing and Windows drive-prefix manifest paths are rejected before member verification."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "3cd8cd84fb6c4ca69bc415aa4ae81049b275a672e5b27c20c4920565f94dea35"
+  "candidate_hash": "90d9ce035c9345e34410db74549f40e25479a8afc31d36eddbad486c6f91a556"
 }

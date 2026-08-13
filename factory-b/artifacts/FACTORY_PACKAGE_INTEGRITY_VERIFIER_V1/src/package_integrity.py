@@ -21,6 +21,10 @@ def _safe_manifest_path(raw: str) -> tuple[bool, str]:
         return False, "empty-or-nonstring"
     if "\\" in raw:
         return False, "backslash-not-allowed"
+    if any(ord(ch) < 32 for ch in raw):
+        return False, "control-character-not-allowed"
+    if ":" in raw:
+        return False, "colon-not-allowed"
     p = PurePosixPath(raw)
     if p.is_absolute() or raw.startswith("/"):
         return False, "absolute-path"
