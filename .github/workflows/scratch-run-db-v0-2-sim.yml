@@ -9,6 +9,9 @@ on:
       - scratch/run_db_v0_2_postgres.sql
       - scratch/run_db_v0_2_defect_probe_fragment.sql
       - scratch/run_db_v0_2_1_postgres.sql
+      - scratch/run_db_v0_2_1_query_validation_fragment.sql
+      - scratch/run000001.schema.json
+      - scratch/test_run000001_json_schema.py
       - .github/workflows/scratch-run-db-v0-2-sim.yml
 
 permissions:
@@ -117,3 +120,50 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d postgres -f scratch/run_db_v0_2_1_postgres.sql
+
+  postgres-query-validation-v0-2-1:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Ensure PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Build query validation transaction
+        run: |
+          head -n -1 scratch/run_db_v0_2_1_postgres.sql > /tmp/v0_2_1_query.sql
+          cat scratch/run_db_v0_2_1_query_validation_fragment.sql >> /tmp/v0_2_1_query.sql
+          echo 'ROLLBACK;' >> /tmp/v0_2_1_query.sql
+      - name: Execute six metric query references
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d postgres -f /tmp/v0_2_1_query.sql
+
+  run000001-json-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check 'jsonschema>=4.23,<5'
+      - name: Validate schema and 10 vectors
+        run: python scratch/test_run000001_json_schema.py
