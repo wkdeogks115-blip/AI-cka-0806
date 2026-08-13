@@ -16,12 +16,17 @@
   ],
   "acceptance_criteria": [
     "Valid Factory package passes integrity verification.",
-    "Hash tampering, missing/unexpected files, traversal paths, symlinks, duplicate manifest paths, and unreadable/corrupt package members are detected.",
+    "Hash tampering, missing/unexpected files, traversal paths, symlinks, duplicate manifest paths, malformed manifest rows, and unreadable/corrupt package members are detected.",
+    "Malformed non-object MANIFEST files[] rows fail closed with a machine-readable FAIL receipt instead of raising an uncaught exception.",
     "CLI returns machine-readable receipt and non-zero exit on failure.",
     "Artifact explicitly reports semantic correctness, evidence sufficiency, and release approval as NOT_ASSESSED.",
     "Artifact tests and full Factory regression suite pass.",
-    "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied."
+    "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied.",
+    "Required manifest scalar types reject booleans/nulls and malformed values fail closed.",
+    "NUL, dot-segment, repeated-slash, Windows-drive, traversal, and absolute paths are rejected without uncaught exceptions.",
+    "Unsafe ZIP directory entries are detected; safe explicit ZIP directory entries remain supported.",
+    "Unreadable directory enumeration cannot silently hide unexpected members."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b"
+  "candidate_hash": "43415d500d68a77e4ca5a396bd253f26cc80d8d62aee6f857e87cfda405a1b76"
 }
