@@ -1,4 +1,4 @@
-name: Scratch Run DB v0.2 SQLite Simulation
+name: Scratch Run DB v0.2 Engine Validation
 
 on:
   push:
@@ -6,13 +6,14 @@ on:
       - scratch/run-db-v0-2-sqlite-sim-20260813
     paths:
       - scratch/run_db_v0_2_sim.py
+      - scratch/run_db_v0_2_postgres.sql
       - .github/workflows/scratch-run-db-v0-2-sim.yml
 
 permissions:
   contents: read
 
 jobs:
-  simulate:
+  sqlite-simulate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,3 +24,32 @@ jobs:
           python-version: '3.11'
       - name: Run deterministic SQLite logic simulation
         run: python scratch/run_db_v0_2_sim.py
+
+  postgres-validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Ensure PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+          psql --version
+      - name: Execute PostgreSQL schema and critical guards
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d postgres -f scratch/run_db_v0_2_postgres.sql
