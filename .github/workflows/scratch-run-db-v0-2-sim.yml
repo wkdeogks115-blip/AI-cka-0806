@@ -1,0 +1,25 @@
+name: Scratch Run DB v0.2 SQLite Simulation
+
+on:
+  push:
+    branches:
+      - scratch/run-db-v0-2-sqlite-sim-20260813
+    paths:
+      - scratch/run_db_v0_2_sim.py
+      - .github/workflows/scratch-run-db-v0-2-sim.yml
+
+permissions:
+  contents: read
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run deterministic SQLite logic simulation
+        run: python scratch/run_db_v0_2_sim.py
