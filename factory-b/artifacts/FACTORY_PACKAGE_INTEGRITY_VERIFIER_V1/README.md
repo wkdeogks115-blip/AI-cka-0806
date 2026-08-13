@@ -27,7 +27,7 @@ recorded as manifest-row errors and are skipped during byte verification instead
 uncaught attribute error.
 
 Manifest scalar types are validated fail-closed (`schema_version`, `candidate`, integer `file_count`,
-and integer `size`), NUL/non-canonical/dot/repeated-slash/Windows-drive paths are rejected, and ZIP
+and integer `size`), control-character/colon-bearing/non-canonical/dot/repeated-slash/Windows-drive paths are rejected, and ZIP
 directory entries are path/symlink-checked before they are ignored as structural directories.
 
 Directory enumeration is also fail-closed: unreadable subdirectories, symlink entries, and non-regular

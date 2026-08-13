@@ -20,14 +20,14 @@ def _sha256_bytes(data: bytes) -> str:
 def _safe_manifest_path(raw: str) -> tuple[bool, str]:
     if not isinstance(raw, str) or not raw:
         return False, "empty-or-nonstring"
-    if "\x00" in raw:
-        return False, "nul-not-allowed"
+    if any(ord(ch) < 32 for ch in raw):
+        return False, "control-character-not-allowed"
     if "\\" in raw:
         return False, "backslash-not-allowed"
+    if ":" in raw:
+        return False, "colon-not-allowed"
     if raw.startswith("/"):
         return False, "absolute-path"
-    if len(raw) >= 2 and raw[0].isalpha() and raw[1] == ":":
-        return False, "windows-drive-prefix"
     raw_parts = raw.split("/")
     if any(part in {"", ".", ".."} for part in raw_parts):
         return False, "dot-or-traversal-segment"

@@ -106,3 +106,24 @@ def test_unreadable_unexpected_directory_fails_closed(tmp_path):
         hidden.chmod(0o700)
     assert receipt["verdict"] == "FAIL"
     assert any(item.startswith("directory-scan-error:hidden:") for item in receipt["errors"])
+
+def test_control_character_manifest_path_fails_closed(tmp_path):
+    root = tmp_path / "pkg-control"
+    manifest = _manifest([_row("bad\nname")])
+    _write_dir(root, {}, manifest)
+    receipt = verify_package(root)
+    assert receipt["verdict"] == "FAIL"
+    assert any("control-character-not-allowed" in item for item in receipt["errors"])
+
+
+def test_zip_colon_ads_path_fails_closed(tmp_path):
+    payload = b"x"
+    manifest = _manifest([_row("safe.txt:ads", payload)])
+    z = tmp_path / "colon-ads.zip"
+    with zipfile.ZipFile(z, "w") as f:
+        f.writestr("safe.txt:ads", payload)
+        f.writestr("MANIFEST.json", json.dumps(manifest))
+    receipt = verify_package(z)
+    assert receipt["verdict"] == "FAIL"
+    assert any("colon-not-allowed" in item for item in receipt["errors"])
+

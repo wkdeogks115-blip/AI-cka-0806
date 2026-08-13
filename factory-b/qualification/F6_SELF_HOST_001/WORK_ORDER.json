@@ -25,8 +25,9 @@
     "Required manifest scalar types reject booleans/nulls and malformed values fail closed.",
     "NUL, dot-segment, repeated-slash, Windows-drive, traversal, and absolute paths are rejected without uncaught exceptions.",
     "Unsafe ZIP directory entries are detected; safe explicit ZIP directory entries remain supported.",
-    "Unreadable directory enumeration cannot silently hide unexpected members."
+    "Unreadable directory enumeration cannot silently hide unexpected members.",
+    "Control-character and colon-bearing/ADS-like manifest paths are rejected before member verification."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "43415d500d68a77e4ca5a396bd253f26cc80d8d62aee6f857e87cfda405a1b76"
+  "candidate_hash": "a0847299f61a6b8fb63a81571326cd638fbf5a89d7a9390ec77292247088d755"
 }

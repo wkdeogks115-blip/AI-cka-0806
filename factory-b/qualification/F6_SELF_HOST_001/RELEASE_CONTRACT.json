@@ -1,8 +1,8 @@
 {
   "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
   "target": "GITHUB_PR",
-  "candidate_hash": "43415d500d68a77e4ca5a396bd253f26cc80d8d62aee6f857e87cfda405a1b76",
-  "verification_state": "LOCAL_BOUNDED_PATCH_REVALIDATED_FRESH_GITHUB_CI_AND_TRUE_CLEAN_REVIEW_REQUIRED",
+  "candidate_hash": "a0847299f61a6b8fb63a81571326cd638fbf5a89d7a9390ec77292247088d755",
+  "verification_state": "CONTROL_COLON_PATH_PATCH_LOCAL_REVALIDATION_PENDING_FRESH_EXACT_HEAD_CI_AND_TRUE_CLEAN_REVIEW",
   "approval_state": "SCOPED_APPROVED",
   "independent_approval": "PENDING",
   "read_back_required": true,
@@ -16,6 +16,7 @@
     "Supervisor probe PR #19 reproduced an uncaught AttributeError for a non-object MANIFEST files[] row at the v1.0.3 exact-head code path; the v1.0.4 patch candidate added fail-closed row guards.",
     "No merge, deployment, ACTIVE, FINAL, or independent approval is granted by this patch candidate.",
     "v1.0.5 candidate is PATCH_REQUIRED follow-up from internal bounded adversarial review; no same-context result is treated as TRUE Clean Independent Review.",
-    "Local bounded matrix: 24/24 expected outcomes after patch; unreadable-directory check also fails closed in a nobody process. Full GitHub regression remains required."
+    "Local bounded matrix: 24/24 expected outcomes after patch; unreadable-directory check also fails closed in a nobody process. Full GitHub regression remains required.",
+    "Follow-up bounded cross-candidate matrix found control-character and colon/ADS-like paths still accepted on PR #22 exact head; this patch candidate closes only those two path classes."
   ]
 }
