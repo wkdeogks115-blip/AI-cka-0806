@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:meohan:orchestration:run:canonical-e2e:v0.1.0",
+  "$id": "urn:meohan:orchestration:run:canonical-e2e:v0.1.1",
   "title": "Canonical Actual E2E Run",
   "type": "object",
   "additionalProperties": false,
@@ -41,8 +41,8 @@
       "required":["surface_identity","workflow_status"],
       "properties": {
         "surface_identity":{"type":"string","minLength":1},
-        "started_at":{"type":["string","null"],"format":"date-time"},
-        "finished_at":{"type":["string","null"],"format":"date-time"},
+        "started_at":{"anyOf":[{"type":"string","pattern":"^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"},{"type":"null"}]},
+        "finished_at":{"anyOf":[{"type":"string","pattern":"^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"},{"type":"null"}]},
         "workflow_status":{"type":"string","minLength":1},
         "workflow_accepted":{"type":["boolean","null"]},
         "human_intervention_required":{"type":["boolean","null"]}
