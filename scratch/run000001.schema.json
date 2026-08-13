@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:meohan:orchestration:run:canonical-e2e:v0.1.0",
+  "title": "Canonical Actual E2E Run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id","run_purpose","evidence_class","qualification_eligible","task","source","execution","routing_decisions","attempts","final_acceptance_status"],
+  "properties": {
+    "run_id": {"const": "RUN-000001"},
+    "run_purpose": {"const": "ACTUAL_CANONICAL_E2E"},
+    "evidence_class": {"const": "ACTUAL"},
+    "qualification_eligible": {"const": false},
+    "qualification_exclusion_reason": {"type": "string", "minLength": 1},
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_id","task_type","risk_level"],
+      "properties": {
+        "task_id": {"type":"string","minLength":1},
+        "task_type": {"type":"string","minLength":1},
+        "risk_level": {"enum":["LOW","MEDIUM","HIGH","CRITICAL"]},
+        "acceptance_contract_ref": {"type":["string","null"]},
+        "acceptance_contract_hash": {"type":["string","null"]}
+      }
+    },
+    "source": {
+      "type":"object",
+      "additionalProperties":false,
+      "required":["repository","ref","sha","source_lock_hash"],
+      "properties": {
+        "repository":{"type":"string","minLength":1},
+        "ref":{"type":"string","minLength":1},
+        "sha":{"type":"string","minLength":7},
+        "source_lock_hash":{"type":"string","minLength":1},
+        "packet_hashes":{"type":"array","items":{"type":"string","minLength":1}}
+      }
+    },
+    "execution": {
+      "type":"object",
+      "additionalProperties":false,
+      "required":["surface_identity","workflow_status"],
+      "properties": {
+        "surface_identity":{"type":"string","minLength":1},
+        "started_at":{"type":["string","null"],"format":"date-time"},
+        "finished_at":{"type":["string","null"],"format":"date-time"},
+        "workflow_status":{"type":"string","minLength":1},
+        "workflow_accepted":{"type":["boolean","null"]},
+        "human_intervention_required":{"type":["boolean","null"]}
+      }
+    },
+    "routing_decisions": {
+      "type":"array",
+      "minItems":1,
+      "items": {
+        "type":"object",
+        "additionalProperties":false,
+        "required":["decision_no","model_id","harness_id"],
+        "properties": {
+          "decision_no":{"type":"integer","minimum":1},
+          "model_id":{"type":"string","minLength":1},
+          "harness_id":{"type":"string","minLength":1},
+          "reason":{"type":["string","null"]}
+        }
+      }
+    },
+    "attempts": {
+      "type":"array",
+      "minItems":1,
+      "items": {
+        "type":"object",
+        "additionalProperties":false,
+        "required":["attempt_no","model_id","harness_id","execution_status","cost_evidence_class"],
+        "properties": {
+          "attempt_no":{"type":"integer","minimum":1},
+          "model_id":{"type":"string","minLength":1},
+          "harness_id":{"type":"string","minLength":1},
+          "execution_status":{"type":"string","minLength":1},
+          "attempt_accepted":{"type":["boolean","null"]},
+          "input_tokens":{"type":["integer","null"],"minimum":0},
+          "output_tokens":{"type":["integer","null"],"minimum":0},
+          "latency_ms":{"type":["integer","null"],"minimum":0},
+          "cost_usd":{"type":["number","null"],"minimum":0},
+          "cost_evidence_class":{"enum":["ACTUAL","REPORTED","INFERRED","NOT_VERIFIED"]},
+          "human_intervention":{"type":["boolean","null"]},
+          "exit_code":{"type":["integer","null"]},
+          "receipt_hash":{"type":["string","null"]}
+        }
+      }
+    },
+    "tests":{"type":"array"},
+    "reviews":{"type":"array"},
+    "evidence":{"type":"array"},
+    "artifacts":{"type":"array"},
+    "limitations":{"type":"array","items":{"type":"string"}},
+    "final_acceptance_status":{"enum":["ACCEPT","FAIL","HOLD","NOT_VERIFIED"]}
+  }
+}
