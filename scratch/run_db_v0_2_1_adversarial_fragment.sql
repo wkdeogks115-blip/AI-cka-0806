@@ -7,14 +7,15 @@ CREATE TEMP TABLE v021_probe_results (
 );
 
 -- D101: a non-QUALIFICATION ACTUAL run can still be inserted into an ACTUAL qualification cohort.
+-- Use A/H2 to avoid colliding with the legitimate C1/T-Q1/A/H1 observation.
 INSERT INTO runs(run_id,task_id,run_purpose,evidence_class,workflow_status,workflow_accepted,qualification_eligible,source_lock_hash)
 VALUES ('SHADOW-Q-CONTAM','T-Q1','SHADOW','ACTUAL','PASS',TRUE,FALSE,'shadow-q');
 INSERT INTO routing_decisions(routing_decision_id,run_id,decision_no,selected_model_id,selected_harness_id,risk_level,mode)
-VALUES ('SHADOW-Q-D','SHADOW-Q-CONTAM',1,'A','H1','LOW','ACTUAL');
+VALUES ('SHADOW-Q-D','SHADOW-Q-CONTAM',1,'A','H2','LOW','ACTUAL');
 INSERT INTO run_attempts(attempt_id,run_id,routing_decision_id,attempt_no,model_id,harness_id,execution_status,attempt_accepted,first_attempt_for_subject,cost_usd,cost_evidence_class,human_intervention)
-VALUES ('SHADOW-Q-A','SHADOW-Q-CONTAM','SHADOW-Q-D',1,'A','H1','PASS',TRUE,TRUE,0.03,'ACTUAL',FALSE);
+VALUES ('SHADOW-Q-A','SHADOW-Q-CONTAM','SHADOW-Q-D',1,'A','H2','PASS',TRUE,TRUE,0.03,'ACTUAL',FALSE);
 INSERT INTO qualification_observations
-VALUES ('O-SHADOW-CONTAM','C1','T-Q1','SHADOW-Q-CONTAM','SHADOW-Q-A','A','H1','ACCEPT',TRUE,FALSE,0.03);
+VALUES ('O-SHADOW-CONTAM','C1','T-Q1','SHADOW-Q-CONTAM','SHADOW-Q-A','A','H2','ACCEPT',TRUE,FALSE,0.03);
 INSERT INTO v021_probe_results VALUES (
   'D101_NON_QUALIFICATION_RUN_CAN_ENTER_COHORT',
   EXISTS (SELECT 1 FROM qualification_observations WHERE observation_id='O-SHADOW-CONTAM'),
@@ -74,11 +75,11 @@ INSERT INTO qualification_results(
   critical_failures,major_failures,qualification_status,routing_eligible
 ) VALUES ('QR-PILOT','C1','A','H1',1,0.5,0.5,0.5,0.0,0,0,'PILOT',FALSE);
 INSERT INTO routing_decisions(routing_decision_id,run_id,decision_no,selected_model_id,selected_harness_id,risk_level,mode,qualification_result_id)
-VALUES ('D-ACTUAL-PILOT','SHADOW-Q-CONTAM',2,'A','H1','LOW','ACTUAL','QR-PILOT');
+VALUES ('D-ACTUAL-PILOT','SHADOW-Q-CONTAM',2,'A','H2','LOW','ACTUAL','QR-PILOT');
 INSERT INTO v021_probe_results VALUES (
   'D105_ACTUAL_ROUTE_CAN_REFERENCE_INELIGIBLE_QUALIFICATION',
   EXISTS (SELECT 1 FROM routing_decisions WHERE routing_decision_id='D-ACTUAL-PILOT'),
-  'v0.2.1 FK proves existence but not routing_eligible=true'
+  'v0.2.1 FK proves existence but not routing_eligible=true and does not bind selected subject to cited qualification subject'
 );
 
 -- D106: a QUALIFIED routing-eligible result can be created from an unfrozen cohort.
