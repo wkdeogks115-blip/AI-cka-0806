@@ -1,8 +1,8 @@
 {
   "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
   "target": "GITHUB_PR",
-  "candidate_hash": "426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b",
-  "verification_state": "LOCAL_PATCH_REVALIDATED_FRESH_EXACT_HEAD_REVIEW_REQUIRED",
+  "candidate_hash": "43415d500d68a77e4ca5a396bd253f26cc80d8d62aee6f857e87cfda405a1b76",
+  "verification_state": "LOCAL_BOUNDED_PATCH_REVALIDATED_FRESH_GITHUB_CI_AND_TRUE_CLEAN_REVIEW_REQUIRED",
   "approval_state": "SCOPED_APPROVED",
   "independent_approval": "PENDING",
   "read_back_required": true,
@@ -12,6 +12,10 @@
     "Integrity verifier is a support artifact, not a new Core module.",
     "F6.1 external MANIFEST SHA-256 trust-anchor behavior is preserved.",
     "PR #12 reproduced a corrupt ZIP member escaping as BadZipFile; F6.2 requires machine-readable FAIL instead.",
-    "Gate B MAJOR-001 parent-symlink isolation is locally revalidated at candidate hash 426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b; no new GitHub head was created in this PATCH-ONLY step."
+    "Gate B MAJOR-001 parent-symlink isolation remains preserved from v1.0.3.",
+    "Supervisor probe PR #19 reproduced an uncaught AttributeError for a non-object MANIFEST files[] row at the v1.0.3 exact-head code path; the v1.0.4 patch candidate added fail-closed row guards.",
+    "No merge, deployment, ACTIVE, FINAL, or independent approval is granted by this patch candidate.",
+    "v1.0.5 candidate is PATCH_REQUIRED follow-up from internal bounded adversarial review; no same-context result is treated as TRUE Clean Independent Review.",
+    "Local bounded matrix: 24/24 expected outcomes after patch; unreadable-directory check also fails closed in a nobody process. Full GitHub regression remains required."
   ]
 }
