@@ -40,3 +40,35 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d postgres -f scratch/run_db_v0_2_2_postgres.sql
+
+  postgres-v0-2-2-negative-controls:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Build bounded negative-control transaction
+        run: |
+          head -n -1 scratch/run_db_v0_2_2_postgres.sql > /tmp/v0_2_2_negative.sql
+          cat scratch/run_db_v0_2_2_adversarial.sql >> /tmp/v0_2_2_negative.sql
+          echo 'ROLLBACK;' >> /tmp/v0_2_2_negative.sql
+      - name: Execute 12 fail-closed negative controls
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d postgres -f /tmp/v0_2_2_negative.sql
