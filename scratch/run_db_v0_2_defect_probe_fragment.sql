@@ -22,8 +22,9 @@ DO $$ BEGIN
 END $$;
 
 -- D02: qualification observation can claim a subject that does not match the referenced attempt.
+-- H2 avoids colliding with the legitimate A/H1 observation while still deliberately mismatching B1 (B/H1).
 INSERT INTO qualification_observations
-VALUES ('O-MISMATCH','C1','T-Q1','RQ1','B1','A','H1','ACCEPT',TRUE,FALSE,0.07);
+VALUES ('O-MISMATCH','C1','T-Q1','RQ1','B1','A','H2','ACCEPT',TRUE,FALSE,0.07);
 INSERT INTO defect_probe_results VALUES (
   'D02_OBSERVATION_SUBJECT_ATTEMPT_MISMATCH',
   EXISTS (SELECT 1 FROM qualification_observations qo JOIN run_attempts ra ON ra.attempt_id=qo.attempt_id
