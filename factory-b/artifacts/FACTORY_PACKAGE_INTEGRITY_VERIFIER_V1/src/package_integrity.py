@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import stat
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -19,13 +20,20 @@ def _sha256_bytes(data: bytes) -> str:
 def _safe_manifest_path(raw: str) -> tuple[bool, str]:
     if not isinstance(raw, str) or not raw:
         return False, "empty-or-nonstring"
+    if "\x00" in raw:
+        return False, "nul-not-allowed"
     if "\\" in raw:
         return False, "backslash-not-allowed"
-    p = PurePosixPath(raw)
-    if p.is_absolute() or raw.startswith("/"):
+    if raw.startswith("/"):
         return False, "absolute-path"
-    if any(part in {"", ".", ".."} for part in p.parts):
+    if len(raw) >= 2 and raw[0].isalpha() and raw[1] == ":":
+        return False, "windows-drive-prefix"
+    raw_parts = raw.split("/")
+    if any(part in {"", ".", ".."} for part in raw_parts):
         return False, "dot-or-traversal-segment"
+    p = PurePosixPath(raw)
+    if p.is_absolute():
+        return False, "absolute-path"
     return True, p.as_posix()
 
 
@@ -36,10 +44,19 @@ def _manifest_rows(manifest: dict[str, Any]) -> tuple[list[dict[str, Any]], list
     for key in ("schema_version", "candidate", "file_count", "files"):
         if key not in manifest:
             errors.append(f"manifest-missing-key:{key}")
+    schema_version = manifest.get("schema_version")
+    if not isinstance(schema_version, str) or not schema_version:
+        errors.append("manifest-schema-version-invalid")
+    candidate = manifest.get("candidate")
+    if not isinstance(candidate, str) or not candidate:
+        errors.append("manifest-candidate-invalid")
+    file_count = manifest.get("file_count")
+    if not isinstance(file_count, int) or isinstance(file_count, bool) or file_count < 0:
+        errors.append("manifest-file-count-invalid")
     rows = manifest.get("files")
     if not isinstance(rows, list):
         return [], errors + ["manifest-files-not-array"]
-    if manifest.get("file_count") != len(rows):
+    if isinstance(file_count, int) and not isinstance(file_count, bool) and file_count >= 0 and file_count != len(rows):
         errors.append("manifest-file-count-mismatch")
     seen: set[str] = set()
     for i, row in enumerate(rows):
@@ -58,7 +75,7 @@ def _manifest_rows(manifest: dict[str, Any]) -> tuple[list[dict[str, Any]], list
         if not isinstance(digest, str) or len(digest) != 64 or any(c not in HEX64 for c in digest.lower()):
             errors.append(f"manifest-invalid-sha256:{normalized}")
         size = row.get("size")
-        if size is not None and (not isinstance(size, int) or size < 0):
+        if size is not None and (not isinstance(size, int) or isinstance(size, bool) or size < 0):
             errors.append(f"manifest-invalid-size:{normalized}")
     return rows, errors
 
@@ -127,6 +144,58 @@ def _directory_member_path_issue(root: Path, root_resolved: Path, rel: str) -> s
     return None
 
 
+def _scan_directory_actual(root: Path) -> tuple[set[str], list[str], list[str]]:
+    """Enumerate actual directory members without following symlinks and fail closed on scan errors."""
+    actual: set[str] = set()
+    unsafe: list[str] = []
+    errors: list[str] = []
+
+    def _onerror(err: OSError) -> None:
+        filename = getattr(err, "filename", None)
+        rel = "<unknown>"
+        if filename:
+            try:
+                rel = Path(filename).relative_to(root).as_posix()
+            except Exception:
+                rel = str(filename)
+        errors.append(f"directory-scan-error:{rel}:{type(err).__name__}")
+
+    for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=False, onerror=_onerror):
+        base = Path(dirpath)
+        kept_dirs: list[str] = []
+        for name in dirnames:
+            p = base / name
+            rel = p.relative_to(root).as_posix()
+            try:
+                mode = p.lstat().st_mode
+            except OSError as e:
+                errors.append(f"directory-entry-lstat-error:{rel}:{type(e).__name__}")
+                continue
+            if stat.S_ISLNK(mode):
+                unsafe.append(f"{rel}:symlink")
+            elif not stat.S_ISDIR(mode):
+                unsafe.append(f"{rel}:not-directory")
+            else:
+                kept_dirs.append(name)
+        dirnames[:] = kept_dirs
+
+        for name in filenames:
+            p = base / name
+            rel = p.relative_to(root).as_posix()
+            try:
+                mode = p.lstat().st_mode
+            except OSError as e:
+                errors.append(f"directory-entry-lstat-error:{rel}:{type(e).__name__}")
+                continue
+            if stat.S_ISLNK(mode):
+                unsafe.append(f"{rel}:symlink")
+            elif not stat.S_ISREG(mode):
+                unsafe.append(f"{rel}:not-regular-file")
+            elif rel not in CONTROL_FILES:
+                actual.add(rel)
+    return actual, unsafe, errors
+
+
 def verify_directory(root: Path, expected_manifest_sha256: str | None = None) -> dict[str, Any]:
     r = _base_receipt(root, "DIRECTORY", expected_manifest_sha256)
     if root.is_symlink():
@@ -166,6 +235,8 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
     r["declared_files"] = len(rows)
     declared: set[str] = set()
     for row in rows:
+        if not isinstance(row, dict):
+            continue
         raw = row.get("path")
         ok, rel = _safe_manifest_path(raw)
         if not ok:
@@ -198,13 +269,9 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
             r["size_mismatches"].append(rel)
             continue
         r["verified_files"] += 1
-    actual: set[str] = set()
-    for p in root.rglob("*"):
-        rel = p.relative_to(root).as_posix()
-        if p.is_symlink():
-            r["unsafe_paths"].append(f"{rel}:symlink")
-        elif p.is_file() and rel not in CONTROL_FILES:
-            actual.add(rel)
+    actual, scan_unsafe, scan_errors = _scan_directory_actual(root)
+    r["unsafe_paths"].extend(scan_unsafe)
+    r["errors"].extend(scan_errors)
     r["unexpected"].extend(sorted(actual - declared))
     return _finalize(r)
 
@@ -227,14 +294,17 @@ def verify_zip(path: Path, expected_manifest_sha256: str | None = None) -> dict[
         info_by_name: dict[str, zipfile.ZipInfo] = {}
         for info in infos:
             name = info.filename
-            if info.is_dir():
-                continue
-            ok, normalized = _safe_manifest_path(name)
+            is_dir = info.is_dir()
+            check_name = name[:-1] if is_dir and name.endswith("/") else name
+            ok, normalized = _safe_manifest_path(check_name)
             if not ok:
                 r["unsafe_paths"].append(f"{name}:{normalized}")
                 continue
             if _zip_is_symlink(info):
                 r["unsafe_paths"].append(f"{normalized}:symlink")
+                continue
+            if is_dir:
+                continue
             if normalized in info_by_name:
                 r["duplicate_paths"].append(normalized)
             else:
@@ -272,6 +342,8 @@ def verify_zip(path: Path, expected_manifest_sha256: str | None = None) -> dict[
         r["declared_files"] = len(rows)
         declared: set[str] = set()
         for row in rows:
+            if not isinstance(row, dict):
+                continue
             raw = row.get("path")
             ok, rel = _safe_manifest_path(raw)
             if not ok:
