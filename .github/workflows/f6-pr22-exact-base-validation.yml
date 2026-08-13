@@ -1,0 +1,31 @@
+name: F6 PR22 Exact Base Validation
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/f6-pr22-exact-base-validation.yml'
+      - 'factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/**'
+      - 'factory-b/qualification/F6_SELF_HOST_001/**'
+
+jobs:
+  exact-base-f6:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact validation PR base SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Assert exact base SHA
+        run: |
+          echo "expected_base_sha=${{ github.event.pull_request.base.sha }}"
+          echo "actual_checkout_sha=$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.base.sha }}"
+      - name: Install test dependency
+        run: python -m pip install pytest
+      - name: Run exact-head artifact tests
+        run: python -m pytest -q factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/tests
+      - name: Validate exact-head frozen F6 candidate hash and approval boundary
+        run: python factory-b/tools/f6_selfhost_ci.py
