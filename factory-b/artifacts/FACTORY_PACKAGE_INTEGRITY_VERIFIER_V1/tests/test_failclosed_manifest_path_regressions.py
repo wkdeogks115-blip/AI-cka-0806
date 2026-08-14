@@ -139,3 +139,52 @@ def test_zip_colon_ads_path_fails_closed(tmp_path):
     receipt = verify_package(z)
     assert receipt["verdict"] == "FAIL"
     assert any("colon-not-allowed" in item for item in receipt["errors"])
+
+
+def test_zip_nonregular_unix_member_types_fail_closed(tmp_path):
+    payload = b"payload"
+    special_types = [
+        ("fifo", stat.S_IFIFO),
+        ("character-device", stat.S_IFCHR),
+        ("block-device", stat.S_IFBLK),
+        ("socket", stat.S_IFSOCK),
+        ("directory-without-slash", stat.S_IFDIR),
+    ]
+    for label, file_type in special_types:
+        zpath = tmp_path / f"special-{label}.zip"
+        member = zipfile.ZipInfo("member.bin")
+        member.create_system = 3
+        member.external_attr = (file_type | 0o600) << 16
+        with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
+            zf.writestr(member, payload)
+            zf.writestr("MANIFEST.json", json.dumps(_manifest([_row("member.bin", payload)])))
+        receipt = verify_package(zpath)
+        assert receipt["verdict"] == "FAIL", label
+        assert any("not-regular-file" in item for item in receipt["unsafe_paths"]), (label, receipt)
+
+
+def test_zip_regular_unix_and_absent_type_bits_remain_compatible(tmp_path):
+    payload_regular = b"regular"
+    payload_unspecified = b"unspecified"
+    zpath = tmp_path / "compatible-types.zip"
+
+    regular = zipfile.ZipInfo("regular.bin")
+    regular.create_system = 3
+    regular.external_attr = (stat.S_IFREG | 0o600) << 16
+
+    unspecified = zipfile.ZipInfo("unspecified.bin")
+    unspecified.create_system = 3
+    unspecified.external_attr = 0o600 << 16
+
+    manifest = _manifest([
+        _row("regular.bin", payload_regular),
+        _row("unspecified.bin", payload_unspecified),
+    ])
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
+        zf.writestr(regular, payload_regular)
+        zf.writestr(unspecified, payload_unspecified)
+        zf.writestr("MANIFEST.json", json.dumps(manifest))
+
+    receipt = verify_package(zpath)
+    assert receipt["verdict"] == "PASS"
+    assert receipt["verified_files"] == 2
