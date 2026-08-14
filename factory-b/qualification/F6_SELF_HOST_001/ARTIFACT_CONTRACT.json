@@ -6,7 +6,7 @@
   "why": "Every reusable Factory package needs a cheap independent byte/path integrity check before semantic verification or release review",
   "when": "After package creation, after transport/read-back, and before higher-level evidence or release decisions",
   "where": "Local Linux, GitHub Actions, or another environment with Python 3.11+",
-  "how": "Read MANIFEST.json, validate required scalar types and declared rows, reject malformed/non-object rows, reject control-character/colon-bearing/non-canonical/dot/repeated-slash/Windows-drive paths, reject symlink directory roots and path components, validate ZIP directory entries before ignoring structural directories, enumerate directory contents fail-closed on scan errors, compare bytes/sizes/paths, optionally bind the manifest to an externally frozen SHA-256 trust anchor, and emit a machine-readable JSON receipt.",
+  "how": "Read MANIFEST.json, validate required scalar types and declared rows, reject malformed/non-object rows, reject C0/DEL/C1 control-character, colon-bearing, non-canonical, dot, repeated-slash, and Windows-drive paths, reject symlink directory roots and path components, validate ZIP directory entries before ignoring structural directories, enumerate directory contents fail-closed on scan errors, compare bytes/sizes/paths, optionally bind the manifest to an externally frozen SHA-256 trust anchor, and emit a machine-readable JSON receipt.",
   "inputs": [
     "Factory package directory or ZIP containing MANIFEST.json; ZIP may use exactly one safe wrapper root"
   ],
@@ -27,7 +27,7 @@
   "failure_modes": [
     "Unreadable directory enumeration that could hide unexpected members",
     "Unsafe ZIP directory entries including symlink/traversal/absolute directory metadata",
-    "Control-character, colon-bearing, dot-segment, repeated-slash, Windows-drive, traversal, or absolute paths",
+    "C0/DEL/C1 control-character, colon-bearing, dot-segment, repeated-slash, Windows-drive, traversal, or absolute paths",
     "Malformed required manifest scalar types (schema_version, candidate, file_count, size)",
     "Malformed or missing manifest, including non-object files[] rows",
     "Hash/size mismatch",
@@ -50,12 +50,12 @@
     "Full regression suite passes",
     "Anchored mode rejects coordinated payload+manifest substitution against the frozen manifest hash",
     "Malformed required scalar types fail closed instead of passing via Python bool/int equality or mere key presence",
-    "NUL/non-canonical manifest paths fail closed without uncaught path exceptions",
+    "NUL/C0/DEL/C1 and non-canonical manifest paths fail closed without uncaught path exceptions",
     "Unsafe ZIP directory entries fail closed while normal explicit directory entries remain supported",
     "Unreadable directory enumeration emits FAIL evidence instead of silently hiding unexpected members",
-    "Control-character and colon-bearing/Windows ADS-like paths fail closed before member lookup"
+    "C0/DEL/C1 control-character and colon-bearing/Windows ADS-like paths fail closed before member lookup in directory and ZIP modes"
   ],
-  "test_status": "LOCAL_PATCH_TESTS_TARGET_21_OF_21_FRESH_GITHUB_REVALIDATION_REQUIRED",
+  "test_status": "TRUE_CLEAN_REVIEW_MAJOR_001_PATCHED_21_OF_21_ARTIFACT_TESTS_PASS_HASH_REBOUND_FRESH_EXACT_HEAD_CI_REQUIRED",
   "known_limitations": [
     "Without an external expected MANIFEST.json SHA-256, PASS proves self-consistency only and cannot detect coordinated payload+manifest substitution",
     "v1 supports the current Factory B MANIFEST.json shape",
@@ -63,8 +63,8 @@
     "Concurrent filesystem mutation between path validation and byte read is not claimed to be hardened",
     "It proves byte/path/readability consistency, not semantic quality, provenance truth, or release approval"
   ],
-  "version": "1.0.5-patch-candidate",
-  "candidate_hash": "a0847299f61a6b8fb63a81571326cd638fbf5a89d7a9390ec77292247088d755",
+  "version": "1.0.6-patch-candidate",
+  "candidate_hash": "c0996266aca5fe0f9b685b395a896346cf18c09be343ca1ae90bcd854fd61581",
   "provenance": [
     "FACTORY_B_V1 F6 self-host qualification",
     "F6.1 external MANIFEST SHA-256 trust-anchor patch",
@@ -72,6 +72,7 @@
     "Gate B MAJOR-001 directory parent-symlink isolation patch",
     "Supervisor probe PR #19 reproduced non-object MANIFEST row AttributeError on Ubuntu GitHub Actions; minimal loop guard patch then passed 14/14 artifact tests",
     "Internal packet-only/process-isolated bounded review found fail-closed/path-enumeration gaps in v1.0.4; v1.0.5 patch candidate addresses only those supported findings. This is not TRUE independent approval.",
-    "Bounded same-17 cross-candidate matrix found ZIP colon/ADS and control-newline paths still PASS on PR #22; minimal general control-character and colon guards added"
+    "Bounded same-17 cross-candidate matrix found ZIP colon/ADS and control-newline paths still PASS on PR #22; minimal general control-character and colon guards added",
+    "TRUE Clean Independent Review on frozen PR #22 packet returned PATCH_REQUIRED MAJOR-001 after reproducing U+007F DELETE and U+0085 C1 control paths as PASS; v1.0.6 minimally extends the control predicate to C0/DEL/C1 and adds matching-file directory+ZIP regression coverage. Fresh clean re-review remains required."
   ]
 }
