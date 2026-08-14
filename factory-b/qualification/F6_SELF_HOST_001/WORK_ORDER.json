@@ -31,5 +31,5 @@
     "Unpaired Unicode surrogate code points in manifest-declared paths fail closed before filesystem encoding/resolution in DIRECTORY and ZIP modes, with a machine-readable FAIL receipt."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "7f4ee53269a20b93b6fc6d9e1a4ecc4921b37f9f7d9f355f7e4f0706409f8a18"
+  "candidate_hash": "42107a48174cedcc25ba426879245b9f44e935336edc360c24519c061ff8bab2"
 }

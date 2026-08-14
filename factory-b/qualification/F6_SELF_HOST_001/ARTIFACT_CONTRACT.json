@@ -67,7 +67,7 @@
     "It proves byte/path/readability consistency, not semantic quality, provenance truth, or release approval"
   ],
   "version": "1.0.8-patch-candidate",
-  "candidate_hash": "7f4ee53269a20b93b6fc6d9e1a4ecc4921b37f9f7d9f355f7e4f0706409f8a18",
+  "candidate_hash": "42107a48174cedcc25ba426879245b9f44e935336edc360c24519c061ff8bab2",
   "provenance": [
     "FACTORY_B_V1 F6 self-host qualification",
     "F6.1 external MANIFEST SHA-256 trust-anchor patch",
