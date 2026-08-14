@@ -1,0 +1,39 @@
+name: Scratch Gate B v1.0.6 Clean Re-review Packet Build
+
+on:
+  push:
+    branches:
+      - scratch/run-db-v0-2-sqlite-sim-20260813
+    paths:
+      - scratch/build_gate_b_v106_packet.py
+      - .github/workflows/scratch-gate-b-v106-packet.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build-packet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout scratch builder
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build mechanically frozen re-review packet
+        run: python scratch/build_gate_b_v106_packet.py
+      - name: Show build result
+        run: cat GATE_B_PACKET_BUILD_RESULT_V1_0_6.json && cat GATE_B_CLEAN_REVIEW_PACKET_V1_0_6.sha256.txt
+      - name: Upload packet artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-b-clean-rereview-packet-v1-0-6
+          path: |
+            GATE_B_CLEAN_REVIEW_PACKET_V1_0_6.zip
+            GATE_B_CLEAN_REVIEW_PACKET_V1_0_6.sha256.txt
+            GATE_B_PACKET_BUILD_RESULT_V1_0_6.json
+          if-no-files-found: error
+          compression-level: 0
