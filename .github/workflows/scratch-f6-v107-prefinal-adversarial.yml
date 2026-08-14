@@ -1,0 +1,128 @@
+name: Scratch F6 v1.0.7 Pre-Final Adversarial Saturation
+
+on:
+  push:
+    branches:
+      - scratch/run-db-v0-2-sqlite-sim-20260813
+    paths:
+      - '.github/workflows/scratch-f6-v107-prefinal-adversarial.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  adversarial:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR22 v1.0.7 head
+        uses: actions/checkout@v4
+        with:
+          ref: 1b542817bf2bd23309b8da69231c5656fc23a37a
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Assert exact head
+        run: test "$(git rev-parse HEAD)" = "1b542817bf2bd23309b8da69231c5656fc23a37a"
+      - name: Run existing artifact tests
+        run: |
+          python -m pip install pytest
+          python -m pytest -q factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/tests
+      - name: Run pre-final bounded adversarial saturation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+          import hashlib, importlib.util, json, os, random, stat, tempfile, zipfile
+          from pathlib import Path
+
+          mod_path = Path('factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/src/package_integrity.py')
+          spec = importlib.util.spec_from_file_location('package_integrity', mod_path)
+          mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+          verify = mod.verify_package
+
+          def row(path, data=b'x'):
+              return {'path': path, 'sha256': hashlib.sha256(data).hexdigest(), 'size': len(data)}
+          def manifest(rows):
+              return {'schema_version':'1.0.0','candidate':'PREFINAL','file_count':len(rows),'files':rows}
+          def assert_fail(receipt, label):
+              if receipt.get('verdict') != 'FAIL':
+                  raise AssertionError(f'{label}: expected FAIL got {receipt}')
+          def assert_pass(receipt, label):
+              if receipt.get('verdict') != 'PASS':
+                  raise AssertionError(f'{label}: expected PASS got {receipt}')
+
+          total = 0
+          with tempfile.TemporaryDirectory() as td:
+              root = Path(td)
+
+              # ZIP special Unix file types: all non-regular payload types must fail closed.
+              for label, mode in [
+                  ('fifo', stat.S_IFIFO|0o644), ('chr', stat.S_IFCHR|0o644),
+                  ('blk', stat.S_IFBLK|0o644), ('sock', stat.S_IFSOCK|0o644),
+                  ('dir-fileform', stat.S_IFDIR|0o755), ('symlink', stat.S_IFLNK|0o777),
+              ]:
+                  zp=root/f'{label}.zip'; data=b'x'; zi=zipfile.ZipInfo('a.bin'); zi.create_system=3; zi.external_attr=mode<<16
+                  with zipfile.ZipFile(zp,'w',zipfile.ZIP_STORED) as z:
+                      z.writestr(zi,data); z.writestr('MANIFEST.json',json.dumps(manifest([row('a.bin',data)])))
+                  assert_fail(verify(zp), f'zip-{label}'); total += 1
+
+              # Explicit regular Unix member and absent type bits remain compatible.
+              for label, zi in [
+                  ('regular', zipfile.ZipInfo('a.bin')),
+                  ('absent-type', zipfile.ZipInfo('a.bin')),
+                  ('dos-producer', zipfile.ZipInfo('a.bin')),
+              ]:
+                  if label == 'regular':
+                      zi.create_system=3; zi.external_attr=(stat.S_IFREG|0o644)<<16
+                  elif label == 'absent-type':
+                      zi.create_system=3; zi.external_attr=0
+                  else:
+                      zi.create_system=0; zi.external_attr=0x20
+                  zp=root/f'{label}.zip'; data=b'x'
+                  with zipfile.ZipFile(zp,'w',zipfile.ZIP_STORED) as z:
+                      z.writestr(zi,data); z.writestr('MANIFEST.json',json.dumps(manifest([row('a.bin',data)])))
+                  assert_pass(verify(zp), f'zip-{label}'); total += 1
+
+              # Directory-form ZIP entries: valid explicit dir passes, type mismatch fails.
+              zi=zipfile.ZipInfo('d/'); zi.create_system=3; zi.external_attr=(stat.S_IFDIR|0o755)<<16
+              zp=root/'dir-good.zip'
+              with zipfile.ZipFile(zp,'w',zipfile.ZIP_STORED) as z:
+                  z.writestr(zi,b''); z.writestr('d/a.bin',b'x'); z.writestr('MANIFEST.json',json.dumps(manifest([row('d/a.bin')])))
+              assert_pass(verify(zp),'zip-dir-good'); total += 1
+              zi=zipfile.ZipInfo('d/'); zi.create_system=3; zi.external_attr=(stat.S_IFREG|0o644)<<16
+              zp=root/'dir-mismatch.zip'
+              with zipfile.ZipFile(zp,'w',zipfile.ZIP_STORED) as z:
+                  z.writestr(zi,b''); z.writestr('d/a.bin',b'x'); z.writestr('MANIFEST.json',json.dumps(manifest([row('d/a.bin')])))
+              assert_fail(verify(zp),'zip-dir-mismatch'); total += 1
+
+              # Control-file metadata must also fail closed if special type is explicit.
+              for control in ['MANIFEST.json','SHA256SUMS.txt']:
+                  zp=root/f'control-special-{control.replace(".","_")}.zip'
+                  special=zipfile.ZipInfo(control); special.create_system=3; special.external_attr=(stat.S_IFIFO|0o644)<<16
+                  with zipfile.ZipFile(zp,'w',zipfile.ZIP_STORED) as z:
+                      if control=='MANIFEST.json':
+                          z.writestr('a.bin',b'x'); z.writestr(special,json.dumps(manifest([row('a.bin')])))
+                      else:
+                          z.writestr('a.bin',b'x'); z.writestr('MANIFEST.json',json.dumps(manifest([row('a.bin')]))); z.writestr(special,b'ignored')
+                  assert_fail(verify(zp), f'control-special-{control}'); total += 1
+
+              # Malformed Unicode/surrogate path must never escape as an uncaught exception.
+              surrogate_paths=['bad\ud800name','\udfff','x/\ud800/y']
+              for i,p in enumerate(surrogate_paths):
+                  pkg=root/f'surrogate-{i}'; pkg.mkdir(); (pkg/'MANIFEST.json').write_text(json.dumps(manifest([row(p)])),encoding='utf-8')
+                  try:
+                      r=verify(pkg)
+                  except Exception as e:
+                      raise AssertionError(f'surrogate-path-uncaught:{type(e).__name__}:{e}')
+                  assert_fail(r, f'surrogate-{i}'); total += 1
+
+              # Deterministic malformed-path fuzz: verifier must not throw and unsafe classes must fail.
+              bad_paths=['../a','./a','a//b','/abs','C:/a','a\\b','a:b','a\x00b','a\n','a\x7f','a\u0085','a\u009f']
+              for i,p in enumerate(bad_paths):
+                  pkg=root/f'bad-{i}'; pkg.mkdir(); (pkg/'MANIFEST.json').write_text(json.dumps(manifest([row(p)])),encoding='utf-8')
+                  try: r=verify(pkg)
+                  except Exception as e: raise AssertionError(f'bad-path-uncaught:{p!r}:{type(e).__name__}:{e}')
+                  assert_fail(r,f'bad-path-{i}'); total += 1
+
+              print(f'PREFINAL_ADVERSARIAL_PASS total={total}')
+          PY
