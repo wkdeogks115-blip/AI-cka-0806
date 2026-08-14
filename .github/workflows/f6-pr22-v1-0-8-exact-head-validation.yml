@@ -1,0 +1,29 @@
+name: F6 PR22 v1.0.8 Exact Head Validation
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/f6-pr22-v1-0-8-exact-head-validation.yml'
+
+jobs:
+  exact-head-f6:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR22 v1.0.8 target SHA
+        uses: actions/checkout@v4
+        with:
+          ref: f677497d3fb83925c0a4561c2e1d373987e7a301
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Assert exact PR22 v1.0.8 target SHA
+        run: |
+          echo "expected_target_sha=f677497d3fb83925c0a4561c2e1d373987e7a301"
+          echo "actual_checkout_sha=$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "f677497d3fb83925c0a4561c2e1d373987e7a301"
+      - name: Install test dependency
+        run: python -m pip install pytest
+      - name: Run exact-head artifact tests
+        run: python -m pytest -q factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/tests
+      - name: Validate exact-head frozen F6 candidate hash and approval boundary
+        run: python factory-b/tools/f6_selfhost_ci.py
