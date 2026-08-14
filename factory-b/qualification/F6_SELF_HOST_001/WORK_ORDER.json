@@ -26,8 +26,9 @@
     "NUL, C0/DEL/C1 control characters, dot-segment, repeated-slash, Windows-drive, traversal, and absolute paths are rejected without uncaught exceptions.",
     "Unsafe ZIP directory entries are detected; safe explicit ZIP directory entries remain supported.",
     "Unreadable directory enumeration cannot silently hide unexpected members.",
-    "Control-character and colon-bearing/ADS-like manifest paths are rejected before member verification."
+    "Control-character and colon-bearing/ADS-like manifest paths are rejected before member verification.",
+    "ZIP entries with explicit Unix FIFO, character-device, block-device, socket, symlink, or directory metadata on a non-directory-form name fail closed; regular entries and entries without type bits remain compatible."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "c0996266aca5fe0f9b685b395a896346cf18c09be343ca1ae90bcd854fd61581"
+  "candidate_hash": "e151c0b328c7c26f3fb57db89bb21cbb255215c056003f20bc9283737b2e6d51"
 }
