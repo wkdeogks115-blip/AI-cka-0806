@@ -1,4 +1,4 @@
-# Factory Package Integrity Verifier v1.0.5-patch-candidate
+# Factory Package Integrity Verifier v1.0.6-patch-candidate
 
 A deterministic integrity checker for Factory B artifact/release packages.
 
@@ -27,8 +27,9 @@ recorded as manifest-row errors and are skipped during byte verification instead
 uncaught attribute error.
 
 Manifest scalar types are validated fail-closed (`schema_version`, `candidate`, integer `file_count`,
-and integer `size`), control-character/colon-bearing/non-canonical/dot/repeated-slash/Windows-drive paths are rejected, and ZIP
-directory entries are path/symlink-checked before they are ignored as structural directories.
+and integer `size`), C0/DEL/C1 control-character, colon-bearing, non-canonical, dot, repeated-slash,
+and Windows-drive paths are rejected, and ZIP directory entries are path/symlink-checked before they
+are ignored as structural directories.
 
 Directory enumeration is also fail-closed: unreadable subdirectories, symlink entries, and non-regular
 entries cannot be silently skipped while the package reports `PASS`.
