@@ -107,13 +107,26 @@ def test_unreadable_unexpected_directory_fails_closed(tmp_path):
     assert receipt["verdict"] == "FAIL"
     assert any(item.startswith("directory-scan-error:hidden:") for item in receipt["errors"])
 
-def test_control_character_manifest_path_fails_closed(tmp_path):
-    root = tmp_path / "pkg-control"
-    manifest = _manifest([_row("bad\nname")])
-    _write_dir(root, {}, manifest)
-    receipt = verify_package(root)
-    assert receipt["verdict"] == "FAIL"
-    assert any("control-character-not-allowed" in item for item in receipt["errors"])
+
+def test_control_character_manifest_paths_include_del_and_c1_fail_closed(tmp_path):
+    payload = b"x"
+    controls = ["\n", "\x7f", "\u0085", "\u009f"]
+    for i, control in enumerate(controls):
+        name = f"bad{control}name-{i}.txt"
+
+        root = tmp_path / f"pkg-control-{i}"
+        _write_dir(root, {name: payload}, _manifest([_row(name, payload)]))
+        receipt = verify_package(root)
+        assert receipt["verdict"] == "FAIL"
+        assert any("control-character-not-allowed" in item for item in receipt["errors"])
+
+        zpath = tmp_path / f"control-{i}.zip"
+        with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
+            zf.writestr(name, payload)
+            zf.writestr("MANIFEST.json", json.dumps(_manifest([_row(name, payload)])))
+        receipt = verify_package(zpath)
+        assert receipt["verdict"] == "FAIL"
+        assert any("control-character-not-allowed" in item for item in receipt["errors"])
 
 
 def test_zip_colon_ads_path_fails_closed(tmp_path):
@@ -126,4 +139,3 @@ def test_zip_colon_ads_path_fails_closed(tmp_path):
     receipt = verify_package(z)
     assert receipt["verdict"] == "FAIL"
     assert any("colon-not-allowed" in item for item in receipt["errors"])
-
