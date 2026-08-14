@@ -1,4 +1,4 @@
-# Factory Package Integrity Verifier v1.0.6-patch-candidate
+# Factory Package Integrity Verifier v1.0.7-patch-candidate
 
 A deterministic integrity checker for Factory B artifact/release packages.
 
@@ -28,8 +28,14 @@ uncaught attribute error.
 
 Manifest scalar types are validated fail-closed (`schema_version`, `candidate`, integer `file_count`,
 and integer `size`), C0/DEL/C1 control-character, colon-bearing, non-canonical, dot, repeated-slash,
-and Windows-drive paths are rejected, and ZIP directory entries are path/symlink-checked before they
+and Windows-drive paths are rejected, and ZIP directory entries are path/type-checked before they
 are ignored as structural directories.
+
+For ZIP entries with explicit Unix file-type bits, only regular files are accepted as payload members
+and only directory-typed entries with directory-form names are accepted as structural directories.
+Symlinks, FIFOs, character/block devices, sockets, and directory metadata on non-directory-form names
+are fail-closed. ZIP entries whose type bits are absent remain accepted for compatibility with common
+ZIP producers, subject to all other manifest/path/hash/size/readability checks.
 
 Directory enumeration is also fail-closed: unreadable subdirectories, symlink entries, and non-regular
 entries cannot be silently skipped while the package reports `PASS`.
