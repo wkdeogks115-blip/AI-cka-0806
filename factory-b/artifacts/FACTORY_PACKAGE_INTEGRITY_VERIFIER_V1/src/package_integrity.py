@@ -20,7 +20,7 @@ def _sha256_bytes(data: bytes) -> str:
 def _safe_manifest_path(raw: str) -> tuple[bool, str]:
     if not isinstance(raw, str) or not raw:
         return False, "empty-or-nonstring"
-    if any(ord(ch) < 32 for ch in raw):
+    if any(ord(ch) < 32 or 127 <= ord(ch) <= 159 for ch in raw):
         return False, "control-character-not-allowed"
     if "\\" in raw:
         return False, "backslash-not-allowed"
