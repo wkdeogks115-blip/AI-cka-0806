@@ -276,9 +276,19 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
     return _finalize(r)
 
 
-def _zip_is_symlink(info: zipfile.ZipInfo) -> bool:
+def _zip_member_type_issue(info: zipfile.ZipInfo) -> str | None:
+    """Return an unsafe reason for explicit Unix ZIP types outside regular-file/directory compatibility."""
     mode = (info.external_attr >> 16) & 0xFFFF
-    return stat.S_ISLNK(mode)
+    file_type = stat.S_IFMT(mode)
+    if file_type == 0:
+        return None
+    if stat.S_ISLNK(mode):
+        return "symlink"
+    if info.is_dir():
+        return None if stat.S_ISDIR(mode) else "directory-type-mismatch"
+    if not stat.S_ISREG(mode):
+        return "not-regular-file"
+    return None
 
 
 def verify_zip(path: Path, expected_manifest_sha256: str | None = None) -> dict[str, Any]:
@@ -300,8 +310,9 @@ def verify_zip(path: Path, expected_manifest_sha256: str | None = None) -> dict[
             if not ok:
                 r["unsafe_paths"].append(f"{name}:{normalized}")
                 continue
-            if _zip_is_symlink(info):
-                r["unsafe_paths"].append(f"{normalized}:symlink")
+            type_issue = _zip_member_type_issue(info)
+            if type_issue is not None:
+                r["unsafe_paths"].append(f"{normalized}:{type_issue}")
                 continue
             if is_dir:
                 continue
@@ -357,8 +368,9 @@ def verify_zip(path: Path, expected_manifest_sha256: str | None = None) -> dict[
             if info is None:
                 r["missing"].append(rel)
                 continue
-            if _zip_is_symlink(info):
-                r["unsafe_paths"].append(f"{rel}:symlink")
+            type_issue = _zip_member_type_issue(info)
+            if type_issue is not None:
+                r["unsafe_paths"].append(f"{rel}:{type_issue}")
                 continue
             try:
                 data = zf.read(info)
