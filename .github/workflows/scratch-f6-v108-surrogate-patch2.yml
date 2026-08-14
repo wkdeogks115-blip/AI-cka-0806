@@ -1,0 +1,112 @@
+name: Scratch F6 v1.0.8 Surrogate Patch 2
+on:
+  push:
+    branches:
+      - scratch/run-db-v0-2-sqlite-sim-20260813
+    paths:
+      - .github/workflows/scratch-f6-v108-surrogate-patch2.yml
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: review/f6-2-failclosed-hardening-v1-0-5
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Assert starting head
+        run: test "$(git rev-parse HEAD)" = "1b542817bf2bd23309b8da69231c5656fc23a37a"
+      - name: Patch code tests and README
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          code=Path('factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/src/package_integrity.py')
+          s=code.read_text(encoding='utf-8')
+          old='    if any(ord(ch) < 32 or 127 <= ord(ch) <= 159 for ch in raw):\n        return False, "control-character-not-allowed"\n'
+          new=old+'    if any(0xD800 <= ord(ch) <= 0xDFFF for ch in raw):\n        return False, "surrogate-code-point-not-allowed"\n'
+          assert old in s and 'surrogate-code-point-not-allowed' not in s
+          code.write_text(s.replace(old,new,1),encoding='utf-8')
+
+          tests=Path('factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/tests/test_failclosed_manifest_path_regressions.py')
+          t=tests.read_text(encoding='utf-8')
+          assert 'test_surrogate_manifest_paths_fail_closed_without_exception' not in t
+          t += r'''
+
+
+def test_surrogate_manifest_paths_fail_closed_without_exception(tmp_path):
+    payload = b"x"
+    for i, name in enumerate(["bad\ud800name.txt", "\udfff", "x/\ud800/y.txt"]):
+        root = tmp_path / f"surrogate-dir-{i}"
+        root.mkdir()
+        (root / "MANIFEST.json").write_text(json.dumps(_manifest([_row(name, payload)])), encoding="utf-8")
+        receipt = verify_package(root)
+        assert receipt["verdict"] == "FAIL"
+        assert any("surrogate-code-point-not-allowed" in item for item in receipt["errors"])
+
+        zpath = tmp_path / f"surrogate-zip-{i}.zip"
+        with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
+            zf.writestr("safe.txt", payload)
+            zf.writestr("MANIFEST.json", json.dumps(_manifest([_row(name, payload)])))
+        receipt = verify_package(zpath)
+        assert receipt["verdict"] == "FAIL"
+        assert any("surrogate-code-point-not-allowed" in item for item in receipt["errors"])
+'''
+          tests.write_text(t,encoding='utf-8')
+
+          readme=Path('factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/README.md')
+          r=readme.read_text(encoding='utf-8')
+          r=r.replace('v1.0.6-patch-candidate','v1.0.8-patch-candidate',1)
+          r=r.replace('C0/DEL/C1 control-character, colon-bearing, non-canonical, dot, repeated-slash,','C0/DEL/C1 control-character, Unicode surrogate-code-point, colon-bearing, non-canonical, dot, repeated-slash,',1)
+          readme.write_text(r,encoding='utf-8')
+          PY
+      - name: Test patched artifact
+        run: |
+          python -m pip install pytest
+          python -m pytest -q factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/tests
+      - name: Compute hash
+        shell: bash
+        run: |
+          set +e
+          python factory-b/tools/f6_selfhost_ci.py > /tmp/f6.out 2>&1
+          set -e
+          cat /tmp/f6.out
+          sed -n 's/^artifact_hash=\([0-9a-f]\{64\}\)$/\1/p' /tmp/f6.out | tail -1 > /tmp/artifact_hash
+          test -s /tmp/artifact_hash
+      - name: Rebind contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          h=Path('/tmp/artifact_hash').read_text().strip()
+          q=Path('factory-b/qualification/F6_SELF_HOST_001')
+          for name in ['WORK_ORDER.json','ARTIFACT_CONTRACT.json','RELEASE_CONTRACT.json']:
+              p=q/name
+              data=json.loads(p.read_text(encoding='utf-8'))
+              data['candidate_hash']=h
+              if name=='ARTIFACT_CONTRACT.json':
+                  data['version']='1.0.8-patch-candidate'
+                  data['test_status']='PREFINAL_SURROGATE_FAIL_CLOSED_PATCHED_ARTIFACT_TESTS_PASS_HASH_REBOUND_FINAL_CLEAN_REVIEW_PENDING'
+                  data.setdefault('provenance',[]).append('Supervisor pre-final bounded adversarial saturation on v1.0.7 reproduced an uncaught UnicodeEncodeError for unpaired surrogate manifest paths; v1.0.8 rejects U+D800-DFFF before filesystem resolution and adds directory+ZIP regressions. Supporting internal evidence only.')
+              elif name=='RELEASE_CONTRACT.json':
+                  data['verification_state']='PREFINAL_SURROGATE_FAIL_CLOSED_PATCHED_EXACT_HEAD_CI_AND_FINAL_TRUE_CLEAN_REVIEW_REQUIRED'
+                  data.setdefault('notes',[]).append('v1.0.8 rejects unpaired Unicode surrogate code points before filesystem path resolution. Fresh exact-head CI and one final TRUE Clean review remain mandatory.')
+              else:
+                  item='Unpaired Unicode surrogate code points in manifest paths fail closed without uncaught filesystem encoding exceptions.'
+                  if item not in data.setdefault('acceptance_criteria',[]): data['acceptance_criteria'].append(item)
+              p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+      - name: Validate rebound candidate
+        run: python factory-b/tools/f6_selfhost_ci.py
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1 factory-b/qualification/F6_SELF_HOST_001
+          git commit -m "fix(f6): fail closed on surrogate manifest paths"
+          git push origin HEAD:review/f6-2-failclosed-hardening-v1-0-5
+          git rev-parse HEAD
