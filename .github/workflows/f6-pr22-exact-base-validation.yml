@@ -11,18 +11,18 @@ jobs:
   exact-base-f6:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout exact PR22 v1.0.6 target SHA
+      - name: Checkout exact PR22 v1.0.7 target SHA
         uses: actions/checkout@v4
         with:
-          ref: a8b73b0b2cb13cc0bbbb9bbbb4bf4b4414ed8d66
+          ref: 1b542817bf2bd23309b8da69231c5656fc23a37a
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Assert exact PR22 v1.0.6 target SHA
+      - name: Assert exact PR22 v1.0.7 target SHA
         run: |
-          echo "expected_target_sha=a8b73b0b2cb13cc0bbbb9bbbb4bf4b4414ed8d66"
+          echo "expected_target_sha=1b542817bf2bd23309b8da69231c5656fc23a37a"
           echo "actual_checkout_sha=$(git rev-parse HEAD)"
-          test "$(git rev-parse HEAD)" = "a8b73b0b2cb13cc0bbbb9bbbb4bf4b4414ed8d66"
+          test "$(git rev-parse HEAD)" = "1b542817bf2bd23309b8da69231c5656fc23a37a"
       - name: Install test dependency
         run: python -m pip install pytest
       - name: Run exact-head artifact tests
