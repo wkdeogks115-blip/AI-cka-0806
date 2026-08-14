@@ -119,7 +119,6 @@ def test_control_character_manifest_paths_include_del_and_c1_fail_closed(tmp_pat
         receipt = verify_package(root)
         assert receipt["verdict"] == "FAIL"
         assert any("control-character-not-allowed" in item for item in receipt["errors"])
-
         zpath = tmp_path / f"control-{i}.zip"
         with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
             zf.writestr(name, payload)
@@ -128,6 +127,30 @@ def test_control_character_manifest_paths_include_del_and_c1_fail_closed(tmp_pat
         assert receipt["verdict"] == "FAIL"
         assert any("control-character-not-allowed" in item for item in receipt["errors"])
 
+
+@pytest.mark.parametrize("bad_path", ["bad\ud800name.txt", "bad\udfffname.txt", "nested/\ud800name.txt"])
+def test_surrogate_manifest_paths_fail_closed_before_directory_or_zip_resolution(tmp_path, bad_path):
+    """Unpaired surrogates are rejected before filesystem encoding or Path.resolve()."""
+    payload = b"x"
+    manifest = _manifest([_row(bad_path, payload)])
+
+    root = tmp_path / "directory-subject"
+    _write_dir(root, {"safe.txt": payload}, manifest)
+    receipt = verify_package(root)
+    assert receipt["verdict"] == "FAIL"
+    assert receipt["verified_files"] == 0
+    assert any("surrogate-code-point-not-allowed" in item for item in receipt["errors"])
+    assert receipt["unsafe_paths"]
+
+    zpath = tmp_path / "surrogate-manifest.zip"
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
+        zf.writestr("safe.txt", payload)
+        zf.writestr("MANIFEST.json", json.dumps(manifest))
+    receipt = verify_package(zpath)
+    assert receipt["verdict"] == "FAIL"
+    assert receipt["verified_files"] == 0
+    assert any("surrogate-code-point-not-allowed" in item for item in receipt["errors"])
+    assert receipt["unsafe_paths"]
 
 def test_zip_colon_ads_path_fails_closed(tmp_path):
     payload = b"x"

@@ -27,8 +27,9 @@
     "Unsafe ZIP directory entries are detected; safe explicit ZIP directory entries remain supported.",
     "Unreadable directory enumeration cannot silently hide unexpected members.",
     "Control-character and colon-bearing/ADS-like manifest paths are rejected before member verification.",
-    "ZIP entries with explicit Unix FIFO, character-device, block-device, socket, symlink, or directory metadata on a non-directory-form name fail closed; regular entries and entries without type bits remain compatible."
+    "ZIP entries with explicit Unix FIFO, character-device, block-device, socket, symlink, or directory metadata on a non-directory-form name fail closed; regular entries and entries without type bits remain compatible.",
+    "Unpaired Unicode surrogate code points in manifest-declared paths fail closed before filesystem encoding/resolution in DIRECTORY and ZIP modes, with a machine-readable FAIL receipt."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "e151c0b328c7c26f3fb57db89bb21cbb255215c056003f20bc9283737b2e6d51"
+  "candidate_hash": "7f4ee53269a20b93b6fc6d9e1a4ecc4921b37f9f7d9f355f7e4f0706409f8a18"
 }

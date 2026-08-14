@@ -22,6 +22,8 @@ def _safe_manifest_path(raw: str) -> tuple[bool, str]:
         return False, "empty-or-nonstring"
     if any(ord(ch) < 32 or 127 <= ord(ch) <= 159 for ch in raw):
         return False, "control-character-not-allowed"
+    if any(0xD800 <= ord(ch) <= 0xDFFF for ch in raw):
+        return False, "surrogate-code-point-not-allowed"
     if "\\" in raw:
         return False, "backslash-not-allowed"
     if ":" in raw:
