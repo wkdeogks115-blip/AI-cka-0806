@@ -23,11 +23,11 @@
     "Artifact tests and full Factory regression suite pass.",
     "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied.",
     "Required manifest scalar types reject booleans/nulls and malformed values fail closed.",
-    "NUL, dot-segment, repeated-slash, Windows-drive, traversal, and absolute paths are rejected without uncaught exceptions.",
+    "NUL, C0/DEL/C1 control characters, dot-segment, repeated-slash, Windows-drive, traversal, and absolute paths are rejected without uncaught exceptions.",
     "Unsafe ZIP directory entries are detected; safe explicit ZIP directory entries remain supported.",
     "Unreadable directory enumeration cannot silently hide unexpected members.",
     "Control-character and colon-bearing/ADS-like manifest paths are rejected before member verification."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "a0847299f61a6b8fb63a81571326cd638fbf5a89d7a9390ec77292247088d755"
+  "candidate_hash": "c0996266aca5fe0f9b685b395a896346cf18c09be343ca1ae90bcd854fd61581"
 }
