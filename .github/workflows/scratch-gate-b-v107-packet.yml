@@ -1,0 +1,78 @@
+name: Scratch Gate B v1.0.7 Clean Re-review Packet Build
+
+on:
+  push:
+    branches:
+      - scratch/run-db-v0-2-sqlite-sim-20260813
+    paths:
+      - scratch/build_gate_b_v107_packet.py
+      - .github/workflows/scratch-gate-b-v107-packet.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build-packet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout scratch builder
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build mechanically frozen re-review packet
+        run: python scratch/build_gate_b_v107_packet.py
+      - name: Build one-file dispatch bundle
+        shell: bash
+        run: |
+          PACKET_SHA="$(awk '{print $1}' GATE_B_CLEAN_REVIEW_PACKET_V1_0_7.sha256.txt)"
+          cat > 00_RUN_TRUE_CLEAN_REREVIEW.txt <<EOF
+          이 ZIP 안에서 오직 GATE_B_CLEAN_REVIEW_PACKET_V1_0_7.zip 과 이 지시문만 사용해 TRUE Clean Independent Re-review를 수행해.
+
+          이전 프로젝트 대화, 메모리, Supervisor 결론, Gate A 결과, 이전 Gate B 결과, 다른 파일은 사용하지 마.
+
+          먼저 inner packet SHA-256을 직접 계산해 다음 기대값과 비교해:
+          ${PACKET_SHA}
+          다르면 HOLD로 종료해.
+
+          일치하면 packet의 00_README_FIRST.md와 04_INDEPENDENT_REVIEW_CONTRACT.md를 먼저 읽고 그대로 검수해. 02A_PATCH_PROVENANCE_FACTS.json은 이전 verdict 권위가 아니라 defect/patch factual provenance일 뿐이므로 독립적으로 재현·판단해.
+
+          Target:
+          Repository = wkdeogks115-blip/AI-cka-0806
+          PR = #22
+          Base SHA = 212ae0e6b6375d68c81261c08f6b27bc0dab07e8
+          Exact Head SHA = 1b542817bf2bd23309b8da69231c5656fc23a37a
+          Artifact SHA-256 = e151c0b328c7c26f3fb57db89bb21cbb255215c056003f20bc9283737b2e6d51
+
+          반드시 반환:
+          1. INDEPENDENCE_ATTESTATION
+          2. REVIEW_TARGET_IDENTITY
+          3. FINDINGS — CRITICAL/MAJOR/MINOR/COSMETIC
+          4. REVIEW_DIMENSIONS
+          5. VERDICT — PASS_FOR_ACTUAL_EXTERNAL_E2E / PATCH_REQUIRED / HOLD / REJECT
+          6. UNVERIFIED_ITEMS
+          7. RATIONALE
+
+          PASS는 unresolved CRITICAL=0 및 MAJOR=0일 때만 허용하며 merge/deploy/release/ACTIVE/FINAL 승인이 아니다. GitHub/source/tests/contracts를 수정하지 마.
+          EOF
+          zip -q GATE_B_REREVIEW_ONE_FILE_V1_0_7.zip GATE_B_CLEAN_REVIEW_PACKET_V1_0_7.zip 00_RUN_TRUE_CLEAN_REREVIEW.txt
+      - name: Show build result
+        run: |
+          cat GATE_B_PACKET_BUILD_RESULT_V1_0_7.json
+          cat GATE_B_CLEAN_REVIEW_PACKET_V1_0_7.sha256.txt
+          sha256sum GATE_B_REREVIEW_ONE_FILE_V1_0_7.zip
+      - name: Upload packet artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-b-clean-rereview-packet-v1-0-7
+          path: |
+            GATE_B_REREVIEW_ONE_FILE_V1_0_7.zip
+            GATE_B_CLEAN_REVIEW_PACKET_V1_0_7.zip
+            GATE_B_CLEAN_REVIEW_PACKET_V1_0_7.sha256.txt
+            00_RUN_TRUE_CLEAN_REREVIEW.txt
+            GATE_B_PACKET_BUILD_RESULT_V1_0_7.json
+          if-no-files-found: error
+          compression-level: 0
