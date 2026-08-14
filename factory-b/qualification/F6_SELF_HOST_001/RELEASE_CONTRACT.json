@@ -1,8 +1,8 @@
 {
   "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
   "target": "GITHUB_PR",
-  "candidate_hash": "c0996266aca5fe0f9b685b395a896346cf18c09be343ca1ae90bcd854fd61581",
-  "verification_state": "TRUE_CLEAN_REVIEW_MAJOR_001_PATCHED_HASH_REBOUND_FRESH_EXACT_HEAD_CI_AND_CLEAN_REREVIEW_REQUIRED",
+  "candidate_hash": "e151c0b328c7c26f3fb57db89bb21cbb255215c056003f20bc9283737b2e6d51",
+  "verification_state": "CLEAN_REREVIEW_NEW_MAJOR_001_ZIP_SPECIAL_TYPE_PATCHED_HASH_REBOUND_FRESH_EXACT_HEAD_CI_AND_CLEAN_REREVIEW_REQUIRED",
   "approval_state": "SCOPED_APPROVED",
   "independent_approval": "PENDING",
   "read_back_required": true,
@@ -16,8 +16,10 @@
     "Supervisor probe PR #19 reproduced an uncaught AttributeError for a non-object MANIFEST files[] row at the v1.0.3 exact-head code path; the v1.0.4 patch candidate added fail-closed row guards.",
     "No merge, deployment, ACTIVE, FINAL, or independent approval is granted by this patch candidate.",
     "v1.0.5 candidate was a PATCH_REQUIRED follow-up from internal bounded adversarial review; no same-context result is treated as TRUE Clean Independent Review.",
-    "Follow-up bounded cross-candidate matrix found control-character and colon/ADS-like paths still accepted on prior PR #22 exact head and led to the v1.0.5 control/colon guard.",
+    "Follow-up bounded cross-candidate matrix found control-character and colon/ADS-like paths still accepted on prior PR #22 exact head and led to the control/colon guard.",
     "TRUE Clean Independent Review of the frozen PR #22 v1.0.5 packet returned PATCH_REQUIRED with MAJOR-001: U+007F DELETE and U+0085 C1 control-character paths could PASS despite the declared control-character fail-closed boundary.",
-    "v1.0.6 patch candidate minimally rejects C0/DEL/C1 control characters and adds matching-file directory+ZIP regressions for newline, U+007F, U+0085, and U+009F. Fresh exact-head CI and fresh clean re-review are mandatory before the E2E join barrier can pass."
+    "v1.0.6 patch candidate rejected C0/DEL/C1 control characters and added matching-file directory+ZIP regressions for newline, U+007F, U+0085, and U+009F.",
+    "A later reviewer execution reproduced a new MAJOR fail-open: ZIP members carrying explicit Unix FIFO, character-device, block-device, socket, or directory metadata on non-directory-form names could PASS when bytes/hash/size matched.",
+    "v1.0.7 patch candidate minimally validates explicit Unix ZIP member types: regular files and structural directories are accepted in their proper forms, entries with absent type bits remain compatible, and explicit special/non-regular types fail closed. Fresh exact-head CI and fresh clean re-review remain mandatory before the E2E join barrier can pass."
   ]
 }
