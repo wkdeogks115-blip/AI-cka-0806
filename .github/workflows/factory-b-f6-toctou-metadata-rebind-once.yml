@@ -23,45 +23,64 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import json
+
           old='426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b'
           new='113a1e3435ed30773d2a2423f45b5c57f8b790578242e023130b2bfd72f1fca8'
-          paths=[
-            Path('factory-b/qualification/F6_SELF_HOST_001/WORK_ORDER.json'),
-            Path('factory-b/qualification/F6_SELF_HOST_001/ARTIFACT_CONTRACT.json'),
-            Path('factory-b/qualification/F6_SELF_HOST_001/RELEASE_CONTRACT.json'),
-          ]
+          q=Path('factory-b/qualification/F6_SELF_HOST_001')
+          paths=[q/'WORK_ORDER.json', q/'ARTIFACT_CONTRACT.json', q/'RELEASE_CONTRACT.json']
+          old_field=f'"candidate_hash": "{old}"'
+          new_field=f'"candidate_hash": "{new}"'
           for p in paths:
             s=p.read_text(encoding='utf-8')
-            if s.count(old) != 1:
-              raise SystemExit(f'{p}: expected exactly one old candidate hash')
-            p.write_text(s.replace(old,new), encoding='utf-8')
-          p=Path('factory-b/qualification/F6_SELF_HOST_001/ARTIFACT_CONTRACT.json')
+            obj=json.loads(s)
+            if obj.get('candidate_hash') != old:
+              raise SystemExit(f'{p}: candidate_hash is not the frozen PR18 value')
+            if s.count(old_field) != 1:
+              raise SystemExit(f'{p}: expected exactly one candidate_hash field line')
+            p.write_text(s.replace(old_field,new_field,1), encoding='utf-8')
+
+          p=q/'ARTIFACT_CONTRACT.json'
           s=p.read_text(encoding='utf-8')
-          old_status='LOCAL_PATCH_TESTS_PASS_13_OF_13'
+          old_status='"test_status": "LOCAL_PATCH_TESTS_PASS_13_OF_13"'
+          new_status='"test_status": "PRODUCT_INTEGRATION_PATCH_TESTS_PASS_15_OF_15"'
           if s.count(old_status) != 1:
-            raise SystemExit('artifact contract: expected old test_status exactly once')
-          p.write_text(s.replace(old_status,'PRODUCT_INTEGRATION_PATCH_TESTS_PASS_15_OF_15'), encoding='utf-8')
+            raise SystemExit('artifact contract: expected frozen test_status exactly once')
+          p.write_text(s.replace(old_status,new_status,1), encoding='utf-8')
           PY
+
           python - <<'PY'
           import hashlib, json
           from pathlib import Path
           ART=Path('factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1')
-          ignore_dirs={'__pycache__','.pytest_cache','.git'}; ignore_suffix={'.pyc','.pyo'}
+          q=Path('factory-b/qualification/F6_SELF_HOST_001')
+          ignore_dirs={'__pycache__','.pytest_cache','.git'}
+          ignore_suffix={'.pyc','.pyo'}
           rows=[]
           for p in sorted(ART.rglob('*'), key=lambda x:x.as_posix()):
             rel=p.relative_to(ART)
-            if any(part in ignore_dirs for part in rel.parts) or not p.is_file() or p.suffix in ignore_suffix: continue
+            if any(part in ignore_dirs for part in rel.parts) or not p.is_file() or p.suffix in ignore_suffix:
+              continue
             rows.append((rel.as_posix(),hashlib.sha256(p.read_bytes()).hexdigest()))
           h=hashlib.sha256()
           for rel,d in rows:
             h.update(rel.encode()); h.update(b'\0'); h.update(d.encode()); h.update(b'\n')
-          actual=h.hexdigest(); expected='113a1e3435ed30773d2a2423f45b5c57f8b790578242e023130b2bfd72f1fca8'
+          actual=h.hexdigest()
+          expected='113a1e3435ed30773d2a2423f45b5c57f8b790578242e023130b2bfd72f1fca8'
           assert actual==expected,(actual,expected)
-          q=Path('factory-b/qualification/F6_SELF_HOST_001')
           for name in ['WORK_ORDER.json','ARTIFACT_CONTRACT.json','RELEASE_CONTRACT.json']:
-            obj=json.loads((q/name).read_text())
-            assert obj['candidate_hash']==expected,(name,obj.get('candidate_hash'))
+            obj=json.loads((q/name).read_text(encoding='utf-8'))
+            assert obj.get('candidate_hash')==expected,(name,obj.get('candidate_hash'))
+          ac=json.loads((q/'ARTIFACT_CONTRACT.json').read_text(encoding='utf-8'))
+          assert ac.get('test_status')=='PRODUCT_INTEGRATION_PATCH_TESTS_PASS_15_OF_15'
+          rc=json.loads((q/'RELEASE_CONTRACT.json').read_text(encoding='utf-8'))
+          assert rc.get('target')=='GITHUB_PR'
+          assert rc.get('approval_state')=='SCOPED_APPROVED'
+          assert rc.get('independent_approval')=='PENDING'
+          assert rc.get('read_back_required') is True
           PY
+          git diff --check
+
       - name: Remove one-time workflow and commit exact metadata patch
         shell: bash
         run: |
