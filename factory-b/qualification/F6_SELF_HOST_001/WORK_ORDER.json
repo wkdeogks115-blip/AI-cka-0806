@@ -23,5 +23,5 @@
     "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b"
+  "candidate_hash": "113a1e3435ed30773d2a2423f45b5c57f8b790578242e023130b2bfd72f1fca8"
 }
