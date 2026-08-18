@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "CONTROLLED_PRODUCT_SIDE_PATCH_INTEGRATION_REVIEW",
+  "source_pr": 18,
+  "source_exact_head": "212ae0e6b6375d68c81261c08f6b27bc0dab07e8",
+  "source_pr_modified": false,
+  "patch_source_sha256": "e28c6ff418f4eac41b17784959b41711cf9d44ec1270c0108b9f82f736254f27",
+  "patch_test_sha256": "67dcf9636d75f3f026077ee67efa824383d26b9c16402aa649b5bfe6295c4f4a",
+  "authoritative_review": {
+    "fresh_github_proof_run": 32111008275,
+    "independent_patch_evaluator_run": 32111849611,
+    "immutable_receiver_run": 32112420712,
+    "verdict": "PASS_CANDIDATE"
+  },
+  "product_version_created": false,
+  "merge": false,
+  "deploy": false,
+  "release": false,
+  "active": false,
+  "final": false,
+  "status": "PRODUCT_SIDE_PATCH_INTEGRATION_CANDIDATE"
+}
