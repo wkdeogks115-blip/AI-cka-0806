@@ -45,7 +45,7 @@
     "Full regression suite passes",
     "Anchored mode rejects coordinated payload+manifest substitution against the frozen manifest hash"
   ],
-  "test_status": "LOCAL_PATCH_TESTS_PASS_13_OF_13",
+  "test_status": "PRODUCT_INTEGRATION_PATCH_TESTS_PASS_15_OF_15",
   "known_limitations": [
     "Without an external expected MANIFEST.json SHA-256, PASS proves self-consistency only and cannot detect coordinated payload+manifest substitution",
     "v1 supports the current Factory B MANIFEST.json shape",
@@ -53,7 +53,7 @@
     "It proves byte/path/readability consistency, not semantic quality, provenance truth, or release approval"
   ],
   "version": "1.0.3-patch-candidate",
-  "candidate_hash": "426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b",
+  "candidate_hash": "113a1e3435ed30773d2a2423f45b5c57f8b790578242e023130b2bfd72f1fca8",
   "provenance": [
     "FACTORY_B_V1 F6 self-host qualification",
     "F6.1 external MANIFEST SHA-256 trust-anchor patch",

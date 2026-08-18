@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import stat
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -104,6 +105,81 @@ def _finalize(r: dict[str, Any]) -> dict[str, Any]:
     return r
 
 
+def _directory_fd_flags() -> tuple[int | None, str | None]:
+    if os.open not in getattr(os, "supports_dir_fd", set()):
+        return None, "dir-fd-open-unsupported"
+    if not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_DIRECTORY"):
+        return None, "nofollow-directory-open-unsupported"
+    flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_DIRECTORY
+    if hasattr(os, "O_CLOEXEC"):
+        flags |= os.O_CLOEXEC
+    return flags, None
+
+
+def _open_root_fd(root: Path) -> tuple[int | None, str | None]:
+    flags, error = _directory_fd_flags()
+    if flags is None:
+        return None, error
+    try:
+        before = os.lstat(root)
+    except OSError as e:
+        return None, f"root-lstat-error:{type(e).__name__}:{e.errno}"
+    if stat.S_ISLNK(before.st_mode):
+        return None, "root-is-symlink"
+    if not stat.S_ISDIR(before.st_mode):
+        return None, "root-not-directory"
+    try:
+        fd = os.open(root, flags)
+    except OSError as e:
+        return None, f"root-open-error:{type(e).__name__}:{e.errno}"
+    after = os.fstat(fd)
+    if (before.st_dev, before.st_ino) != (after.st_dev, after.st_ino):
+        os.close(fd)
+        return None, "root-identity-changed-during-open"
+    return fd, None
+
+
+def _read_regular_relative_fd(root_fd: int, rel: str) -> tuple[bytes | None, str | None]:
+    parts = PurePosixPath(rel).parts
+    if not parts:
+        return None, "empty-relative-path"
+    flags_dir, error = _directory_fd_flags()
+    if flags_dir is None:
+        return None, error
+    flags_file = os.O_RDONLY | os.O_NOFOLLOW
+    if hasattr(os, "O_CLOEXEC"):
+        flags_file |= os.O_CLOEXEC
+    current_fd = os.dup(root_fd)
+    try:
+        for part in parts[:-1]:
+            try:
+                next_fd = os.open(part, flags_dir, dir_fd=current_fd)
+            except OSError as e:
+                return None, f"component-open-error:{part}:{type(e).__name__}:{e.errno}"
+            os.close(current_fd)
+            current_fd = next_fd
+        leaf = parts[-1]
+        try:
+            fd = os.open(leaf, flags_file, dir_fd=current_fd)
+        except OSError as e:
+            return None, f"leaf-open-error:{leaf}:{type(e).__name__}:{e.errno}"
+        try:
+            st = os.fstat(fd)
+            if not stat.S_ISREG(st.st_mode):
+                return None, f"leaf-not-regular-file:{leaf}"
+            chunks: list[bytes] = []
+            while True:
+                chunk = os.read(fd, 1024 * 1024)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+            return b"".join(chunks), None
+        finally:
+            os.close(fd)
+    finally:
+        os.close(current_fd)
+
+
 def _directory_member_path_issue(root: Path, root_resolved: Path, rel: str) -> str | None:
     """Return an unsafe-path reason before directory member bytes are read."""
     current = root
@@ -137,16 +213,26 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
     except OSError as e:
         r["errors"].append(f"subject-root-resolve-error:{type(e).__name__}")
         return _finalize(r)
+    root_fd, root_fd_error = _open_root_fd(root)
+    if root_fd is None:
+        r["unsafe_paths"].append(f"subject-root:safe-open:{root_fd_error}")
+        return _finalize(r)
     manifest_path = root / "MANIFEST.json"
     if manifest_path.is_symlink():
         r["unsafe_paths"].append("MANIFEST.json:symlink")
+        os.close(root_fd)
         return _finalize(r)
     if not manifest_path.is_file():
         r["errors"].append("MANIFEST.json-not-found")
+        os.close(root_fd)
         return _finalize(r)
     r["manifest_found"] = True
     try:
-        manifest_bytes = manifest_path.read_bytes()
+        manifest_bytes, manifest_read_error = _read_regular_relative_fd(root_fd, "MANIFEST.json")
+        if manifest_bytes is None:
+            r["errors"].append(f"manifest-safe-read-error:{manifest_read_error}")
+            os.close(root_fd)
+            return _finalize(r)
         r["manifest_sha256"] = _sha256_bytes(manifest_bytes)
         if expected_manifest_sha256 is not None:
             if not _valid_sha256_hex(expected_manifest_sha256):
@@ -159,6 +245,7 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
         manifest = json.loads(manifest_bytes.decode("utf-8"))
     except Exception as e:
         r["errors"].append(f"manifest-json-error:{type(e).__name__}")
+        os.close(root_fd)
         return _finalize(r)
     r["manifest_candidate"] = manifest.get("candidate") if isinstance(manifest, dict) else None
     rows, errors = _manifest_rows(manifest)
@@ -186,10 +273,9 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
         if p.is_symlink() or not p.is_file():
             r["unsafe_paths"].append(f"{rel}:not-regular-file")
             continue
-        try:
-            data = p.read_bytes()
-        except Exception as e:
-            r["errors"].append(f"directory-member-read-error:{rel}:{type(e).__name__}")
+        data, safe_read_error = _read_regular_relative_fd(root_fd, rel)
+        if data is None:
+            r["unsafe_paths"].append(f"{rel}:safe-open:{safe_read_error}")
             continue
         if _sha256_bytes(data) != str(row.get("sha256", "")).lower():
             r["hash_mismatches"].append(rel)
@@ -206,6 +292,7 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
         elif p.is_file() and rel not in CONTROL_FILES:
             actual.add(rel)
     r["unexpected"].extend(sorted(actual - declared))
+    os.close(root_fd)
     return _finalize(r)
 
 
