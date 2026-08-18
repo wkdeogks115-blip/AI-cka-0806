@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "classification": "PATCH_CANDIDATE",
+  "material_defect": true,
+  "baseline": {
+    "pr": 18,
+    "base_sha": "9105b3e35bad102dc019b6e8382dc3b11f1ac187",
+    "exact_head_sha": "212ae0e6b6375d68c81261c08f6b27bc0dab07e8",
+    "source_blob_sha1": "2f2c569c22f3604b1d0c79c7f83528fe87497242",
+    "regression": "13/13 PASS",
+    "source_pr_modified": false
+  },
+  "original_deterministic_race": {
+    "runs": 200,
+    "outside_reads": 200,
+    "false_passes_after_outside_read": 100,
+    "leaf_false_passes": 50,
+    "parent_false_passes": 50
+  },
+  "original_concurrent_stress": {
+    "attempts": 1000,
+    "swaps": 836,
+    "passes": 199,
+    "fails": 801,
+    "exceptions": 0,
+    "outside_reads_by_atime": 33,
+    "pass_after_outside_read": 15,
+    "result_sha256": "1925466eda29a3d687ff78dcbc49cb143c49a94817a9cef708b9682adf85fcd4"
+  },
+  "patch_candidate": {
+    "version": "1.0.4-patch-candidate",
+    "artifact_tree_sha256": "aae1fcff288d92a33cfe7b73e7d822af94b0bd0736894254473df3b41ca7f9a5",
+    "regression_and_race_tests": "17/17 PASS",
+    "f6_preflight": "PASS",
+    "independent_review": "PENDING",
+    "active": false,
+    "final": false
+  },
+  "patched_concurrent_stress": {
+    "attempts": 1000,
+    "swaps": 452,
+    "passes": 263,
+    "fails": 737,
+    "exceptions": 0,
+    "outside_reads_by_atime": 0,
+    "pass_after_outside_read": 0,
+    "result_sha256": "9768794178a880c83442b62a22d1d7cabdf6b880babac8d3a6cc120a3f89a2e6"
+  },
+  "patch_diff_path": ".factory-b-review/toctou/F6_3_TOCTOU_MINIMAL_SOURCE_PATCH.diff",
+  "governance": {
+    "merge": false,
+    "deploy": false,
+    "release": false,
+    "next_gate": "FRESH_GITHUB_LINUX_VERIFIER_THEN_FRESH_INDEPENDENT_REVIEW"
+  }
+}
