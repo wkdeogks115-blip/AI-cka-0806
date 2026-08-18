@@ -1,0 +1,282 @@
+--- a/factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/src/package_integrity.py
++++ b/factory-b/artifacts/FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1/src/package_integrity.py
+@@ -3,6 +3,7 @@
+ import argparse
+ import hashlib
+ import json
++import os
+ import stat
+ import zipfile
+ from pathlib import Path, PurePosixPath
+@@ -127,86 +128,203 @@
+     return None
+ 
+ 
++def _secure_directory_flags() -> tuple[int | None, str | None]:
++    required = ("O_RDONLY", "O_DIRECTORY", "O_NOFOLLOW")
++    if any(not hasattr(os, name) for name in required):
++        return None, "secure-openat-flags-unavailable"
++    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
++    if hasattr(os, "O_CLOEXEC"):
++        flags |= os.O_CLOEXEC
++    return flags, None
++
++
++def _secure_file_flags() -> tuple[int | None, str | None]:
++    if not hasattr(os, "O_RDONLY") or not hasattr(os, "O_NOFOLLOW"):
++        return None, "secure-openat-flags-unavailable"
++    flags = os.O_RDONLY | os.O_NOFOLLOW
++    if hasattr(os, "O_CLOEXEC"):
++        flags |= os.O_CLOEXEC
++    return flags, None
++
++
++def _read_regular_member_at(root_fd: int, rel: str) -> tuple[str, bytes | None, str | None]:
++    """Read one relative member through descriptor-anchored, no-follow traversal."""
++    dir_flags, err = _secure_directory_flags()
++    file_flags, ferr = _secure_file_flags()
++    if err or ferr or dir_flags is None or file_flags is None:
++        return "ERROR", None, err or ferr
++    parts = PurePosixPath(rel).parts
++    if not parts:
++        return "ERROR", None, "empty-relative-path"
++    current_fd = os.dup(root_fd)
++    try:
++        for part in parts[:-1]:
++            try:
++                next_fd = os.open(part, dir_flags, dir_fd=current_fd)
++            except FileNotFoundError:
++                return "MISSING", None, f"{rel}:missing-component:{part}"
++            except OSError as e:
++                try:
++                    st = os.stat(part, dir_fd=current_fd, follow_symlinks=False)
++                    if stat.S_ISLNK(st.st_mode):
++                        component = "/".join(parts[: parts.index(part) + 1])
++                        return "UNSAFE", None, f"{rel}:symlink-component:{component}"
++                except OSError:
++                    pass
++                return "UNSAFE", None, f"{rel}:unsafe-component:{part}:{type(e).__name__}"
++            os.close(current_fd)
++            current_fd = next_fd
++        leaf = parts[-1]
++        try:
++            fd = os.open(leaf, file_flags, dir_fd=current_fd)
++        except FileNotFoundError:
++            return "MISSING", None, f"{rel}:missing"
++        except OSError as e:
++            return "UNSAFE", None, f"{rel}:unsafe-leaf:{type(e).__name__}"
++        try:
++            st = os.fstat(fd)
++            if not stat.S_ISREG(st.st_mode):
++                return "UNSAFE", None, f"{rel}:not-regular-file"
++            chunks: list[bytes] = []
++            while True:
++                chunk = os.read(fd, 1024 * 1024)
++                if not chunk:
++                    break
++                chunks.append(chunk)
++            return "OK", b"".join(chunks), None
++        except OSError as e:
++            return "ERROR", None, f"{rel}:secure-read-error:{type(e).__name__}"
++        finally:
++            os.close(fd)
++    finally:
++        os.close(current_fd)
++
++
++def _scan_directory_tree_at(root_fd: int) -> tuple[set[str], list[str], list[str]]:
++    """Inventory the opened package root without following symlinks."""
++    dir_flags, err = _secure_directory_flags()
++    if err or dir_flags is None:
++        return set(), [], [err or "secure-openat-flags-unavailable"]
++    actual: set[str] = set()
++    unsafe: list[str] = []
++    errors: list[str] = []
++
++    def walk(dir_fd: int, prefix: str) -> None:
++        try:
++            names = sorted(os.listdir(dir_fd))
++        except OSError as e:
++            errors.append(f"tree-list-error:{prefix or '.'}:{type(e).__name__}")
++            return
++        for name in names:
++            rel = f"{prefix}/{name}" if prefix else name
++            try:
++                st = os.stat(name, dir_fd=dir_fd, follow_symlinks=False)
++            except FileNotFoundError:
++                errors.append(f"tree-entry-disappeared:{rel}")
++                continue
++            except OSError as e:
++                errors.append(f"tree-stat-error:{rel}:{type(e).__name__}")
++                continue
++            if stat.S_ISLNK(st.st_mode):
++                unsafe.append(f"{rel}:symlink")
++            elif stat.S_ISDIR(st.st_mode):
++                try:
++                    child_fd = os.open(name, dir_flags, dir_fd=dir_fd)
++                except OSError as e:
++                    unsafe.append(f"{rel}:unsafe-directory:{type(e).__name__}")
++                    continue
++                try:
++                    walk(child_fd, rel)
++                finally:
++                    os.close(child_fd)
++            elif stat.S_ISREG(st.st_mode):
++                if rel not in CONTROL_FILES:
++                    actual.add(rel)
++            else:
++                unsafe.append(f"{rel}:not-regular-file")
++
++    walk(root_fd, "")
++    return actual, unsafe, errors
++
++
+ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) -> dict[str, Any]:
+     r = _base_receipt(root, "DIRECTORY", expected_manifest_sha256)
+     if root.is_symlink():
+         r["unsafe_paths"].append("subject-root:symlink")
+         return _finalize(r)
++    dir_flags, flag_error = _secure_directory_flags()
++    if flag_error or dir_flags is None:
++        r["errors"].append(flag_error or "secure-openat-flags-unavailable")
++        return _finalize(r)
+     try:
+-        root_resolved = root.resolve(strict=True)
++        root_fd = os.open(root, dir_flags)
+     except OSError as e:
+-        r["errors"].append(f"subject-root-resolve-error:{type(e).__name__}")
+-        return _finalize(r)
+-    manifest_path = root / "MANIFEST.json"
+-    if manifest_path.is_symlink():
+-        r["unsafe_paths"].append("MANIFEST.json:symlink")
++        r["errors"].append(f"subject-root-secure-open-error:{type(e).__name__}")
+         return _finalize(r)
+-    if not manifest_path.is_file():
+-        r["errors"].append("MANIFEST.json-not-found")
+-        return _finalize(r)
+-    r["manifest_found"] = True
+     try:
+-        manifest_bytes = manifest_path.read_bytes()
+-        r["manifest_sha256"] = _sha256_bytes(manifest_bytes)
+-        if expected_manifest_sha256 is not None:
+-            if not _valid_sha256_hex(expected_manifest_sha256):
+-                r["errors"].append("expected-manifest-sha256-invalid")
+-                r["manifest_hash_match"] = False
++        status, manifest_bytes, issue = _read_regular_member_at(root_fd, "MANIFEST.json")
++        if status != "OK" or manifest_bytes is None:
++            if status == "MISSING":
++                r["errors"].append("MANIFEST.json-not-found")
++            elif status == "UNSAFE":
++                r["unsafe_paths"].append(issue or "MANIFEST.json:unsafe")
+             else:
+-                r["manifest_hash_match"] = r["manifest_sha256"] == expected_manifest_sha256.lower()
+-                if not r["manifest_hash_match"]:
+-                    r["errors"].append("manifest-sha256-mismatch")
+-        manifest = json.loads(manifest_bytes.decode("utf-8"))
+-    except Exception as e:
+-        r["errors"].append(f"manifest-json-error:{type(e).__name__}")
+-        return _finalize(r)
+-    r["manifest_candidate"] = manifest.get("candidate") if isinstance(manifest, dict) else None
+-    rows, errors = _manifest_rows(manifest)
+-    r["errors"].extend(errors)
+-    r["declared_files"] = len(rows)
+-    declared: set[str] = set()
+-    for row in rows:
+-        raw = row.get("path")
+-        ok, rel = _safe_manifest_path(raw)
+-        if not ok:
+-            r["unsafe_paths"].append(str(raw))
+-            continue
+-        if rel in declared:
+-            r["duplicate_paths"].append(rel)
+-            continue
+-        declared.add(rel)
+-        p = root / Path(*PurePosixPath(rel).parts)
+-        path_issue = _directory_member_path_issue(root, root_resolved, rel)
+-        if path_issue is not None:
+-            r["unsafe_paths"].append(path_issue)
+-            continue
+-        if not p.exists():
+-            r["missing"].append(rel)
+-            continue
+-        if p.is_symlink() or not p.is_file():
+-            r["unsafe_paths"].append(f"{rel}:not-regular-file")
+-            continue
++                r["errors"].append(issue or "MANIFEST.json-secure-read-error")
++            return _finalize(r)
++        r["manifest_found"] = True
+         try:
+-            data = p.read_bytes()
++            r["manifest_sha256"] = _sha256_bytes(manifest_bytes)
++            if expected_manifest_sha256 is not None:
++                if not _valid_sha256_hex(expected_manifest_sha256):
++                    r["errors"].append("expected-manifest-sha256-invalid")
++                    r["manifest_hash_match"] = False
++                else:
++                    r["manifest_hash_match"] = r["manifest_sha256"] == expected_manifest_sha256.lower()
++                    if not r["manifest_hash_match"]:
++                        r["errors"].append("manifest-sha256-mismatch")
++            manifest = json.loads(manifest_bytes.decode("utf-8"))
+         except Exception as e:
+-            r["errors"].append(f"directory-member-read-error:{rel}:{type(e).__name__}")
+-            continue
+-        if _sha256_bytes(data) != str(row.get("sha256", "")).lower():
+-            r["hash_mismatches"].append(rel)
+-            continue
+-        if row.get("size") is not None and len(data) != row["size"]:
+-            r["size_mismatches"].append(rel)
+-            continue
+-        r["verified_files"] += 1
+-    actual: set[str] = set()
+-    for p in root.rglob("*"):
+-        rel = p.relative_to(root).as_posix()
+-        if p.is_symlink():
+-            r["unsafe_paths"].append(f"{rel}:symlink")
+-        elif p.is_file() and rel not in CONTROL_FILES:
+-            actual.add(rel)
+-    r["unexpected"].extend(sorted(actual - declared))
+-    return _finalize(r)
++            r["errors"].append(f"manifest-json-error:{type(e).__name__}")
++            return _finalize(r)
++        r["manifest_candidate"] = manifest.get("candidate") if isinstance(manifest, dict) else None
++        rows, errors = _manifest_rows(manifest)
++        r["errors"].extend(errors)
++        r["declared_files"] = len(rows)
++        declared: set[str] = set()
++        for row in rows:
++            raw = row.get("path")
++            ok, rel = _safe_manifest_path(raw)
++            if not ok:
++                r["unsafe_paths"].append(str(raw))
++                continue
++            if rel in declared:
++                r["duplicate_paths"].append(rel)
++                continue
++            declared.add(rel)
++            status, data, issue = _read_regular_member_at(root_fd, rel)
++            if status == "MISSING":
++                r["missing"].append(rel)
++                continue
++            if status == "UNSAFE":
++                r["unsafe_paths"].append(issue or f"{rel}:unsafe")
++                continue
++            if status != "OK" or data is None:
++                r["errors"].append(f"directory-member-read-error:{rel}:{issue or 'secure-read-error'}")
++                continue
++            if _sha256_bytes(data) != str(row.get("sha256", "")).lower():
++                r["hash_mismatches"].append(rel)
++                continue
++            if row.get("size") is not None and len(data) != row["size"]:
++                r["size_mismatches"].append(rel)
++                continue
++            r["verified_files"] += 1
++        actual, unsafe, scan_errors = _scan_directory_tree_at(root_fd)
++        r["unsafe_paths"].extend(unsafe)
++        r["errors"].extend(scan_errors)
++        r["unexpected"].extend(sorted(actual - declared))
++        return _finalize(r)
++    finally:
++        os.close(root_fd)
+ 
+ 
+ def _zip_is_symlink(info: zipfile.ZipInfo) -> bool:
