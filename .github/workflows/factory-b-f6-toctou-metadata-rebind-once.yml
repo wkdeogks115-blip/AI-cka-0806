@@ -1,20 +1,20 @@
 name: factory-b-f6-toctou-metadata-rebind-once
 
 on:
-  push:
-    branches:
-      - factory-b/f6-2-toctou-product-patch-20260818
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   rebind:
-    if: github.actor != 'github-actions[bot]'
+    if: github.event.pull_request.head.ref == 'factory-b/f6-2-toctou-product-patch-20260818' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: wkdeogks115-blip/AI-cka-0806
           ref: factory-b/f6-2-toctou-product-patch-20260818
           fetch-depth: 1
       - name: Rebind frozen candidate metadata to reviewed product patch bytes
@@ -57,8 +57,9 @@ jobs:
             h.update(rel.encode()); h.update(b'\0'); h.update(d.encode()); h.update(b'\n')
           actual=h.hexdigest(); expected='113a1e3435ed30773d2a2423f45b5c57f8b790578242e023130b2bfd72f1fca8'
           assert actual==expected,(actual,expected)
+          q=Path('factory-b/qualification/F6_SELF_HOST_001')
           for name in ['WORK_ORDER.json','ARTIFACT_CONTRACT.json','RELEASE_CONTRACT.json']:
-            obj=json.loads((Path('factory-b/qualification/F6_SELF_HOST_001')/name).read_text())
+            obj=json.loads((q/name).read_text())
             assert obj['candidate_hash']==expected,(name,obj.get('candidate_hash'))
           PY
       - name: Remove one-time workflow and commit exact metadata patch
