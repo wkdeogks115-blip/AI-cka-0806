@@ -1,7 +1,7 @@
 {
   "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
   "target": "GITHUB_PR",
-  "candidate_hash": "42107a48174cedcc25ba426879245b9f44e935336edc360c24519c061ff8bab2",
+  "candidate_hash": "7f56b91e33ac696f54706ca3a94385816fd47a55562d45108ab7f1d2e90b65dd",
   "verification_state": "INTERNAL_SURROGATE_PATH_FAILCLOSED_PATCH_PENDING_FRESH_EXACT_HEAD_CI_AND_FINAL_CLEAN_REVIEW",
   "approval_state": "SCOPED_APPROVED",
   "independent_approval": "PENDING",

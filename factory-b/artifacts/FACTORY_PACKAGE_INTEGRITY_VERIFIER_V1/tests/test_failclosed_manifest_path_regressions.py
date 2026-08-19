@@ -129,6 +129,27 @@ def test_control_character_manifest_paths_include_del_and_c1_fail_closed(tmp_pat
 
 
 @pytest.mark.parametrize("bad_path", ["bad\ud800name.txt", "bad\udfffname.txt", "nested/\ud800name.txt"])
+def test_cli_surrogate_manifest_emits_machine_readable_fail_receipt(tmp_path, bad_path, capsys):
+    payload = b"x"
+    manifest = _manifest([_row(bad_path, payload)])
+    root = tmp_path / "cli-directory"
+    _write_dir(root, {"safe.txt": payload}, manifest)
+    assert mod.main([str(root)]) == 2
+    directory_receipt = json.loads(capsys.readouterr().out)
+    assert directory_receipt["verdict"] == "FAIL"
+    assert directory_receipt["mode"] == "DIRECTORY"
+
+    zpath = tmp_path / "cli-surrogate.zip"
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as zf:
+        zf.writestr("safe.txt", payload)
+        zf.writestr("MANIFEST.json", json.dumps(manifest))
+    assert mod.main([str(zpath)]) == 2
+    zip_receipt = json.loads(capsys.readouterr().out)
+    assert zip_receipt["verdict"] == "FAIL"
+    assert zip_receipt["mode"] == "ZIP"
+
+
+@pytest.mark.parametrize("bad_path", ["bad\ud800name.txt", "bad\udfffname.txt", "nested/\ud800name.txt"])
 def test_surrogate_manifest_paths_fail_closed_before_directory_or_zip_resolution(tmp_path, bad_path):
     """Unpaired surrogates are rejected before filesystem encoding or Path.resolve()."""
     payload = b"x"

@@ -17,6 +17,15 @@ def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _receipt_token(value: Any) -> str:
+    text = value if isinstance(value, str) else str(value)
+    return text.encode("utf-8", "backslashreplace").decode("ascii")
+
+
+def _receipt_json(receipt: dict[str, Any], pretty: bool) -> str:
+    return json.dumps(receipt, ensure_ascii=True, indent=2 if pretty else None, sort_keys=True)
+
+
 def _safe_manifest_path(raw: str) -> tuple[bool, str]:
     if not isinstance(raw, str) or not raw:
         return False, "empty-or-nonstring"
@@ -68,7 +77,7 @@ def _manifest_rows(manifest: dict[str, Any]) -> tuple[list[dict[str, Any]], list
         raw = row.get("path")
         ok, normalized = _safe_manifest_path(raw)
         if not ok:
-            errors.append(f"manifest-row-{i}-unsafe-path:{raw!r}:{normalized}")
+            errors.append(f"manifest-row-{i}-unsafe-path:{_receipt_token(raw)}:{normalized}")
             continue
         if normalized in seen:
             errors.append(f"manifest-duplicate-path:{normalized}")
@@ -242,7 +251,7 @@ def verify_directory(root: Path, expected_manifest_sha256: str | None = None) ->
         raw = row.get("path")
         ok, rel = _safe_manifest_path(raw)
         if not ok:
-            r["unsafe_paths"].append(str(raw))
+            r["unsafe_paths"].append(_receipt_token(raw))
             continue
         if rel in declared:
             r["duplicate_paths"].append(rel)
@@ -360,7 +369,7 @@ def verify_zip(path: Path, expected_manifest_sha256: str | None = None) -> dict[
             raw = row.get("path")
             ok, rel = _safe_manifest_path(raw)
             if not ok:
-                r["unsafe_paths"].append(str(raw))
+                r["unsafe_paths"].append(_receipt_token(raw))
                 continue
             if rel in declared:
                 r["duplicate_paths"].append(rel)
@@ -419,7 +428,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--pretty", action="store_true")
     ns = ap.parse_args(argv)
     receipt = verify_package(ns.subject, expected_manifest_sha256=ns.expected_manifest_sha256)
-    print(json.dumps(receipt, ensure_ascii=False, indent=2 if ns.pretty else None, sort_keys=True))
+    print(_receipt_json(receipt, ns.pretty))
     return 0 if receipt["verdict"] == "PASS" else 2
 
 
