@@ -19,7 +19,7 @@ def _sha256_bytes(data: bytes) -> str:
 
 def _receipt_token(value: Any) -> str:
     text = value if isinstance(value, str) else str(value)
-    return text.encode("utf-8", "backslashreplace").decode("ascii")
+    return text.encode("ascii", "backslashreplace").decode("ascii")
 
 
 def _receipt_json(receipt: dict[str, Any], pretty: bool) -> str:
