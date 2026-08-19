@@ -6,7 +6,7 @@
   "why": "Every reusable Factory package needs a cheap independent byte/path integrity check before semantic verification or release review",
   "when": "After package creation, after transport/read-back, and before higher-level evidence or release decisions",
   "where": "Local Linux, GitHub Actions, or another environment with Python 3.11+",
-  "how": "Read MANIFEST.json, validate declared rows, reject a symlink directory root, inspect every directory-member path component and resolved-root containment before reading bytes, compare bytes/sizes/paths, optionally compare the manifest itself to an externally frozen SHA-256 trust anchor, convert package-member read failures into machine-readable FAIL evidence, and emit a JSON receipt",
+  "how": "Read MANIFEST.json, validate required scalar types and declared rows, reject malformed/non-object rows, reject C0/DEL/C1 control-character and unpaired Unicode surrogate code points before filesystem encoding/resolution, reject colon-bearing, non-canonical, dot, repeated-slash, and Windows-drive paths, reject symlink directory roots and path components, validate ZIP directory entries and explicit Unix file-type metadata before member acceptance, enumerate directory contents fail-closed on scan errors, compare bytes/sizes/paths, optionally bind the manifest to an externally frozen SHA-256 trust anchor, and emit a machine-readable JSON receipt.",
   "inputs": [
     "Factory package directory or ZIP containing MANIFEST.json; ZIP may use exactly one safe wrapper root"
   ],
@@ -25,7 +25,12 @@
   ],
   "approval_boundary": "The verifier may report byte/path/readability integrity only; external release still requires the governing Release Contract and scoped approval",
   "failure_modes": [
-    "Malformed or missing manifest",
+    "Unreadable directory enumeration that could hide unexpected members",
+    "Unsafe ZIP directory entries including symlink/traversal/absolute directory metadata",
+    "Explicit Unix ZIP special-file metadata including FIFO, character/block device, socket, symlink, or directory type on a non-directory-form member",
+    "C0/DEL/C1 control-character, unpaired Unicode surrogate, colon-bearing, dot-segment, repeated-slash, Windows-drive, traversal, or absolute paths",
+    "Malformed required manifest scalar types (schema_version, candidate, file_count, size)",
+    "Malformed or missing manifest, including non-object files[] rows",
     "Hash/size mismatch",
     "Missing/unexpected file",
     "Path traversal or absolute path",
@@ -35,29 +40,44 @@
   ],
   "recovery": [
     "Rebuild the package from the frozen source candidate and regenerate the manifest",
-    "Treat unreadable/corrupt members as FAIL evidence rather than allowing an exception to escape"
+    "Treat malformed/unreadable/corrupt or explicit non-regular ZIP members as FAIL evidence rather than allowing them to pass or an exception to escape"
   ],
   "success_criteria": [
     "Current Factory package verifies",
     "Negative mutation tests are detected",
     "Corrupt ZIP member returns a machine-readable FAIL receipt",
+    "Malformed non-object MANIFEST files[] row returns FAIL without an uncaught exception",
     "Directory parent-symlink and subject-root-symlink negative controls fail with zero verified files",
     "Full regression suite passes",
-    "Anchored mode rejects coordinated payload+manifest substitution against the frozen manifest hash"
+    "Anchored mode rejects coordinated payload+manifest substitution against the frozen manifest hash",
+    "Malformed required scalar types fail closed instead of passing via Python bool/int equality or mere key presence",
+    "NUL/C0/DEL/C1 and non-canonical manifest paths fail closed without uncaught path exceptions",
+    "Unsafe ZIP directory entries fail closed while normal explicit directory entries remain supported",
+    "Unreadable directory enumeration emits FAIL evidence instead of silently hiding unexpected members",
+    "C0/DEL/C1 control-character, unpaired Unicode surrogate, and colon-bearing/Windows ADS-like paths fail closed before member lookup or filesystem resolution in directory and ZIP modes",
+    "Explicit Unix ZIP FIFO, character-device, block-device, socket, symlink, and directory-without-directory-form entries fail closed while regular-file and absent-type-bit entries remain compatible"
   ],
-  "test_status": "LOCAL_PATCH_TESTS_PASS_13_OF_13",
+  "test_status": "INTERNAL_SURROGATE_PATH_FAILCLOSED_PATCH_PENDING_FRESH_EXACT_HEAD_CI_AND_FINAL_CLEAN_REVIEW",
   "known_limitations": [
     "Without an external expected MANIFEST.json SHA-256, PASS proves self-consistency only and cannot detect coordinated payload+manifest substitution",
     "v1 supports the current Factory B MANIFEST.json shape",
     "ZIP wrapper support is limited to exactly one safe top-level wrapper directory",
+    "ZIP entries without explicit Unix file-type bits are accepted for compatibility and remain governed by manifest/path/hash/size/readability checks",
+    "Concurrent filesystem mutation between path validation and byte read is not claimed to be hardened",
     "It proves byte/path/readability consistency, not semantic quality, provenance truth, or release approval"
   ],
-  "version": "1.0.3-patch-candidate",
-  "candidate_hash": "426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b",
+  "version": "1.0.8-patch-candidate",
+  "candidate_hash": "5f4baaf28a5ad542f0a88ba0f5149d97219ba78b26f78ff958e263106f8c1745",
   "provenance": [
     "FACTORY_B_V1 F6 self-host qualification",
     "F6.1 external MANIFEST SHA-256 trust-anchor patch",
     "PR #12 corrupt ZIP negative-control reproduction",
-    "Gate B MAJOR-001 directory parent-symlink isolation patch"
+    "Gate B MAJOR-001 directory parent-symlink isolation patch",
+    "Supervisor probe PR #19 reproduced non-object MANIFEST row AttributeError on Ubuntu GitHub Actions; minimal loop guard patch then passed 14/14 artifact tests",
+    "Internal packet-only/process-isolated bounded review found fail-closed/path-enumeration gaps in v1.0.4; v1.0.5 patch candidate addresses only those supported findings. This is not TRUE independent approval.",
+    "Bounded same-17 cross-candidate matrix found ZIP colon/ADS and control-newline paths still PASS on PR #22; minimal general control-character and colon guards added",
+    "TRUE Clean Independent Review on frozen PR #22 packet returned PATCH_REQUIRED MAJOR-001 after reproducing U+007F DELETE and U+0085 C1 control paths as PASS; v1.0.6 minimally extends the control predicate to C0/DEL/C1 and adds matching-file directory+ZIP regression coverage.",
+    "Subsequent reviewer execution reproduced a new MAJOR fail-open where explicit Unix FIFO/character-device/block-device/socket and directory metadata on non-directory-form ZIP members could PASS; v1.0.7 adds explicit Unix ZIP member-type validation and focused compatibility regressions. Fresh clean re-review remains required.",
+    "Internal bounded pre-final saturation reproduced an uncaught UnicodeEncodeError for unpaired U+D800/U+DFFF manifest-path code points during DIRECTORY resolution. v1.0.8 rejects unpaired surrogate code points before member-path construction/resolution and adds DIRECTORY plus ZIP manifest-declared path regressions. This is internal supporting evidence, not independent approval."
   ]
 }

@@ -1,4 +1,4 @@
-# Factory Package Integrity Verifier v1.0.3-patch-candidate
+# Factory Package Integrity Verifier v1.0.7-patch-candidate
 
 A deterministic integrity checker for Factory B artifact/release packages.
 
@@ -22,6 +22,24 @@ Unreadable directory members and corrupt/unreadable ZIP members are fail-closed:
 records a machine-readable read error and returns `verdict=FAIL` instead of allowing the read
 exception to escape.
 
+Malformed non-object entries inside `MANIFEST.json` `files[]` are also fail-closed. They are
+recorded as manifest-row errors and are skipped during byte verification instead of raising an
+uncaught attribute error.
+
+Manifest scalar types are validated fail-closed (`schema_version`, `candidate`, integer `file_count`,
+and integer `size`), C0/DEL/C1 control-character, colon-bearing, non-canonical, dot, repeated-slash,
+and Windows-drive paths are rejected, and ZIP directory entries are path/type-checked before they
+are ignored as structural directories.
+
+For ZIP entries with explicit Unix file-type bits, only regular files are accepted as payload members
+and only directory-typed entries with directory-form names are accepted as structural directories.
+Symlinks, FIFOs, character/block devices, sockets, and directory metadata on non-directory-form names
+are fail-closed. ZIP entries whose type bits are absent remain accepted for compatibility with common
+ZIP producers, subject to all other manifest/path/hash/size/readability checks.
+
+Directory enumeration is also fail-closed: unreadable subdirectories, symlink entries, and non-regular
+entries cannot be silently skipped while the package reports `PASS`.
+
 Directory mode rejects a symlink subject root and checks every path component from the package
 root through each manifest-declared member before reading bytes. Any symlink component or resolved
 target outside the resolved package root is recorded in `unsafe_paths` and fails closed.
@@ -32,8 +50,8 @@ target outside the resolved package root is recorded in `unsafe_paths` and fails
 - a ZIP containing exactly one safe wrapper root with `MANIFEST.json`
 
 The manifest contract supported by v1 is the Factory B manifest shape:
-`schema_version`, `candidate`, `file_count`, and `files[]` where each file row contains
-`path`, `sha256`, and optional `size`.
+`schema_version`, `candidate`, `file_count`, and `files[]` where each valid file row is an object
+containing `path`, `sha256`, and optional `size`.
 
 ## CLI
 

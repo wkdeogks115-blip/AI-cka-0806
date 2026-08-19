@@ -1,8 +1,8 @@
 {
   "artifact_id": "FACTORY_PACKAGE_INTEGRITY_VERIFIER_V1",
   "target": "GITHUB_PR",
-  "candidate_hash": "426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b",
-  "verification_state": "LOCAL_PATCH_REVALIDATED_FRESH_EXACT_HEAD_REVIEW_REQUIRED",
+  "candidate_hash": "5f4baaf28a5ad542f0a88ba0f5149d97219ba78b26f78ff958e263106f8c1745",
+  "verification_state": "INTERNAL_SURROGATE_PATH_FAILCLOSED_PATCH_PENDING_FRESH_EXACT_HEAD_CI_AND_FINAL_CLEAN_REVIEW",
   "approval_state": "SCOPED_APPROVED",
   "independent_approval": "PENDING",
   "read_back_required": true,
@@ -12,6 +12,15 @@
     "Integrity verifier is a support artifact, not a new Core module.",
     "F6.1 external MANIFEST SHA-256 trust-anchor behavior is preserved.",
     "PR #12 reproduced a corrupt ZIP member escaping as BadZipFile; F6.2 requires machine-readable FAIL instead.",
-    "Gate B MAJOR-001 parent-symlink isolation is locally revalidated at candidate hash 426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b; no new GitHub head was created in this PATCH-ONLY step."
+    "Gate B MAJOR-001 parent-symlink isolation remains preserved from v1.0.3.",
+    "Supervisor probe PR #19 reproduced an uncaught AttributeError for a non-object MANIFEST files[] row at the v1.0.3 exact-head code path; the v1.0.4 patch candidate added fail-closed row guards.",
+    "No merge, deployment, ACTIVE, FINAL, or independent approval is granted by this patch candidate.",
+    "v1.0.5 candidate was a PATCH_REQUIRED follow-up from internal bounded adversarial review; no same-context result is treated as TRUE Clean Independent Review.",
+    "Follow-up bounded cross-candidate matrix found control-character and colon/ADS-like paths still accepted on prior PR #22 exact head and led to the control/colon guard.",
+    "TRUE Clean Independent Review of the frozen PR #22 v1.0.5 packet returned PATCH_REQUIRED with MAJOR-001: U+007F DELETE and U+0085 C1 control-character paths could PASS despite the declared control-character fail-closed boundary.",
+    "v1.0.6 patch candidate rejected C0/DEL/C1 control characters and added matching-file directory+ZIP regressions for newline, U+007F, U+0085, and U+009F.",
+    "A later reviewer execution reproduced a new MAJOR fail-open: ZIP members carrying explicit Unix FIFO, character-device, block-device, socket, or directory metadata on non-directory-form names could PASS when bytes/hash/size matched.",
+    "v1.0.7 patch candidate minimally validates explicit Unix ZIP member types: regular files and structural directories are accepted in their proper forms, entries with absent type bits remain compatible, and explicit special/non-regular types fail closed. Fresh exact-head CI and fresh clean re-review remain mandatory before the E2E join barrier can pass.",
+    "v1.0.8 patch candidate rejects unpaired Unicode surrogate code points in manifest paths before DIRECTORY filesystem encoding/resolution or ZIP lookup, preventing an uncaught UnicodeEncodeError and preserving a machine-readable FAIL receipt. Exact-head CI, bounded internal saturation, and one fresh TRUE Clean review remain mandatory."
   ]
 }

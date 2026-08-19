@@ -16,12 +16,20 @@
   ],
   "acceptance_criteria": [
     "Valid Factory package passes integrity verification.",
-    "Hash tampering, missing/unexpected files, traversal paths, symlinks, duplicate manifest paths, and unreadable/corrupt package members are detected.",
+    "Hash tampering, missing/unexpected files, traversal paths, symlinks, duplicate manifest paths, malformed manifest rows, and unreadable/corrupt package members are detected.",
+    "Malformed non-object MANIFEST files[] rows fail closed with a machine-readable FAIL receipt instead of raising an uncaught exception.",
     "CLI returns machine-readable receipt and non-zero exit on failure.",
     "Artifact explicitly reports semantic correctness, evidence sufficiency, and release approval as NOT_ASSESSED.",
     "Artifact tests and full Factory regression suite pass.",
-    "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied."
+    "Coordinated payload+manifest tampering is detected when an externally frozen MANIFEST.json SHA-256 is supplied.",
+    "Required manifest scalar types reject booleans/nulls and malformed values fail closed.",
+    "NUL, C0/DEL/C1 control characters, dot-segment, repeated-slash, Windows-drive, traversal, and absolute paths are rejected without uncaught exceptions.",
+    "Unsafe ZIP directory entries are detected; safe explicit ZIP directory entries remain supported.",
+    "Unreadable directory enumeration cannot silently hide unexpected members.",
+    "Control-character and colon-bearing/ADS-like manifest paths are rejected before member verification.",
+    "ZIP entries with explicit Unix FIFO, character-device, block-device, socket, symlink, or directory metadata on a non-directory-form name fail closed; regular entries and entries without type bits remain compatible.",
+    "Unpaired Unicode surrogate code points in manifest-declared paths fail closed before filesystem encoding/resolution in DIRECTORY and ZIP modes, with a machine-readable FAIL receipt."
   ],
   "release_target": "GITHUB_PR",
-  "candidate_hash": "426e9db69c00ed9b73a3a4afec318704fd4daf8c4b0c29f267c07bac05e3882b"
+  "candidate_hash": "5f4baaf28a5ad542f0a88ba0f5149d97219ba78b26f78ff958e263106f8c1745"
 }
